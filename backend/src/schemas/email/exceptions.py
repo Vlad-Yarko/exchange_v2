@@ -11,3 +11,7 @@ class Email422(ExceptionSchema):
 
 class ValidateEmail422(ExceptionSchema):
     detail: Union[str, dict] = Field(..., examples=["Verification code is invalid"])
+
+
+class IsVerifiedEmail422(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["Email is invalid"])

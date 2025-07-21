@@ -15,3 +15,8 @@ class EmailService(Service):
     async def validate_email(self, data: ValidateEmailBody) -> Union[ValidateEmailPublic, tuple[int, str]]:
         pass
     
+    async def is_verified_email(self, email: str) -> Union[bool, tuple[int, str]]:
+        pass
+
+
+email_service = EmailService()

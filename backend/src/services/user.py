@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 import uuid
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,14 +21,6 @@ class UserService(Service):
         self.user_repo = user_repo
         self.jwt = jwt_manager
         self.pw = pw_manager
-        
-    async def issue_refresh_token(self, id: int, exp: Optional[int] = None) -> str:
-        token = self.jwt.create_refresh_token(str(id), exp)
-        return token
-    
-    async def issue_access_token(self, id: int) -> str:
-        token = self.jwt.create_access_token(str(id))
-        return token
     
     @transaction
     async def create_one(self, data: UserBody):

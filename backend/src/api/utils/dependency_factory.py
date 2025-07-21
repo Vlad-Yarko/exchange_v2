@@ -1,10 +1,19 @@
-from typing import Callable, Awaitable, Type, Optional, Union
+from typing import Callable, Awaitable, Type, Optional, Union, Any
 
 from fastapi import Depends, HTTPException, status, Response, Path, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from src.utils.service import Service
+from src.services.email import email_service
 from src.types.dependency_factory import TSchemaBody, TSchemaPublic, TDataSchemaPublic
+
+
+def check_for_exception(data: Any) -> None:
+    if isinstance(data, tuple):
+        raise HTTPException(
+            status_code=data[0],
+            detail=data[1]
+        )
 
 
 class DependencyFactory:
@@ -22,6 +31,16 @@ class DependencyFactory:
         self.DataSchemaPublic = DataSchemaPublic
         self.security = HTTPBearer()
         self.alert_func = alert_func
+        self.email_service = email_service
+            
+    def verified_email_dep(self) -> Callable[[], Awaitable[bool]]:
+        SchemaBody = self.SchemaBody
+        async def dep(
+            body: SchemaBody) -> bool:
+            data = await self.email_service.is_verified_email(body.email)
+            check_for_exception(data)
+            return True
+        return dep
         
     def token_dep(self) -> Callable[[], Awaitable[dict]]:
         async def dep(
@@ -65,11 +84,7 @@ class DependencyFactory:
             service: Service = Depends(self.service_dep),
             id: int = Path(..., examples=[1], description="Unique identifier of an object. 💫", ge=1)) -> TSchemaPublic:
             data = await service.get_one(id)
-            if isinstance(data, tuple):
-                raise HTTPException(
-                    status_code=data[0],
-                    detail=data[1]
-                )
+            check_for_exception(data)
             response = self.SchemaPublic.model_validate(data, from_attributes=True)
             return response
         return dep
@@ -80,11 +95,7 @@ class DependencyFactory:
             body: SchemaBody,
             service: Service = Depends(self.service_dep)) -> TSchemaPublic:
             data = await service.create_one(body.model_dump())
-            if isinstance(data, tuple):
-                raise HTTPException(
-                    status_code=data[0],
-                    detail=data[1]
-                )
+            check_for_exception(data)
             # d = body.model_dump()
             # d["id"] = data
             # if self.alert_func:
@@ -101,11 +112,7 @@ class DependencyFactory:
             service: Service = Depends(self.service_dep),
             id: int = Path(..., examples=[1], description="Unique identifier of an object. 💫", ge=1)) -> TSchemaPublic:
             data = await service.update_one(id, body.model_dump())
-            if isinstance(data, tuple):
-                raise HTTPException(
-                    status_code=data[0],
-                    detail=data[1]
-                )
+            check_for_exception(data)
             # response = self.SchemaPublic.model_validate(data, from_attributes=True)
             response = self.SchemaPublic(**data)
             return response
@@ -116,11 +123,7 @@ class DependencyFactory:
             service: Service = Depends(self.service_dep),
             id: int = Path(..., examples=[1], description="Unique identifier of an object. 💫", ge=1)) -> TSchemaPublic:
             data = await service.delete_one(id)
-            if isinstance(data, tuple):
-                raise HTTPException(
-                    status_code=data[0],
-                    detail=data[1]
-                )
+            check_for_exception(data)
             # response = self.SchemaPublic.model_validate(data, from_attributes=True)
             response = self.SchemaPublic(**data)
             return response

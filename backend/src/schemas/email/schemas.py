@@ -35,3 +35,16 @@ class ValidateEmailBody(ValidateEmail):
 
 class ValidateEmailPublic(ValidateEmail, PublicSchema):
     pass
+
+
+class IsVerifiedEmail(Schema):
+    pass
+    
+    
+class IsVerifiedEmailBody(IsVerifiedEmail):
+    email: EmailStr
+    
+    
+class IsVerifiedEmailPublic(IsVerifiedEmail):
+    verified: bool = Field(examples=[True])
+
