@@ -4,4 +4,4 @@ from pydantic import BaseModel
 
 
 class ExceptionSchema(BaseModel):
-    detail: Union[str, list]
+    detail: Union[str, dict]

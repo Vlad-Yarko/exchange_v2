@@ -21,7 +21,8 @@ class UserDependencyFactory(DependencyFactory):
         super().__init__(
             service_dep=service_dep,
             SchemaBody=UserBody,
-            SchemaPublic=UserPublic
+            SchemaPublic=UserPublic,
+            DataSchemaPublic=UsersPublic
         )
 
 

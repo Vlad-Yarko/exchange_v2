@@ -7,3 +7,6 @@ class Base(DeclarativeBase):
     
     createdAt: Mapped[DateTime] = mapped_column(DateTime, default=func.now())
     updatedAt: Mapped[DateTime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
+
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}

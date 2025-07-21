@@ -16,4 +16,4 @@ class CryptoSubscribe(Base):
     userId: Mapped[uuid.UUID] = mapped_column(ForeignKey('users.id'))
     symbolId: Mapped[uuid.UUID] = mapped_column(ForeignKey('crypto.id'))
     
-    currency: Mapped["Crypto"] = relationship("Crypto", back_populates="subscribes", uselist=False)
+    crypto: Mapped["Crypto"] = relationship("Crypto", back_populates="subscribes", uselist=False)

@@ -1,5 +1,5 @@
 from src.bot.utils.response import MessageResponse
-from backend.src.bot.text.quit import *
+from src.bot.text.quit import quit_hand_text
 
 
 class QuitMessageResponse(MessageResponse):

@@ -3,19 +3,28 @@ from typing import Union, Optional
 import uuid
 from functools import wraps
 
-from sqlalchemy import insert, select, func, update
+from sqlalchemy import func, select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.base import Base
 
 
 class Repository(ABC):
+    
     @abstractmethod
-    async def create_one():
+    async def get():
         raise NotImplementedError
     
     @abstractmethod
-    async def select_one():
+    async def get_one():
+        raise NotImplementedError
+    
+    @abstractmethod
+    async def get_count():
+        raise NotImplementedError
+    
+    @abstractmethod
+    async def create_one():
         raise NotImplementedError
     
     @abstractmethod
@@ -23,11 +32,7 @@ class Repository(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    async def select_all():
-        raise NotImplementedError
-    
-    @abstractmethod
-    async def select_count():
+    async def delete_one():
         raise NotImplementedError
     
     
@@ -46,23 +51,19 @@ class SQLAlchemyRepository(Repository):
             if value:
                 condition = getattr(self.model, key) == value
                 conditions.append(condition)
-        # conditions = [
-        #     getattr(self.model, key) == value
-        #     for key, value in kwargs.items()
-        # ]
         return conditions
         
-    async def select_count(self, **kwargs) -> Optional[int]:
+    async def get_count(self, **kwargs) -> Optional[int]:
         conditions = self.equal_conditions(**kwargs)
         query = select(func.count()).select_from(self.model).where(*conditions)
         data = await self.session.execute(query)
         data = data.scalar_one()
         return data
     
-    async def select_all(self, page: Optional[int] = None, **kwargs) -> Optional[tuple[list[Base], int, int]]:
+    async def get(self, page: Optional[int] = None, **kwargs) -> Optional[tuple[list[Base], int, int]]:
         conditions = self.equal_conditions(**kwargs)
         query = None
-        total = await self.select_count(**kwargs)
+        total = await self.get_count(**kwargs)
         if page is None:
             query = select(self.model).where(*conditions)
         else:
@@ -74,32 +75,53 @@ class SQLAlchemyRepository(Repository):
         return data, total, self.PAGINATION_OFFSET
         
     
-    async def select_one(self, field_name: str, value: Union[int, str, uuid.UUID]) -> Optional[Base]:
+    async def get_one(self, field_name: str, value: Union[int, str, uuid.UUID]) -> Optional[Base]:
         query = select(self.model).where(getattr(self.model, field_name) == value)
         data = await self.session.execute(query)
         obj = data.scalar()
         return obj
     
-    async def select_one_by_id(self, id: Union[int, uuid.UUID]) -> Optional[Base]:
-        return await self.select_one("id", id)
+    async def get_one_by_id(self, id: Union[int, uuid.UUID]) -> Optional[Base]:
+        return await self.get_one("id", id)
     
-    async def select_latest(self, **kwargs) -> Optional[list[Base]]:
+    async def get_latest(self, **kwargs) -> Optional[list[Base]]:
         conditions = self.equal_conditions(**kwargs)
         query = select(self.model).where(*conditions).order_by(self.model.createdAt.desc()).limit(self.LATEST_LIMIT)
         data = await self.session.execute(query)
         return data.scalars().all()
     
-    async def create_one(self, **kwargs) -> Union[int, uuid.UUID]:
-        stmt = insert(self.model).values(**kwargs).returning(self.model.id)
-        id = await self.session.execute(stmt)
-        return id.scalar()
+    async def create_one(self, **kwargs) -> Optional[Base]:
+        # PostgreSQL has RETURNING
+        # stmt = insert(self.model).values(**kwargs).returning(self.model)
+        # obj = await self.session.execute(stmt)
+        # return obj.scalar()
+        # MySQL
+        stmt = insert(self.model).values(**kwargs)
+        result = await self.session.execute(stmt)
+        obj = await self.get_one_by_id(result.lastrowid)
+        return obj
     
-    async def update_one(self, id: Union[int, uuid.UUID], **kwargs) -> Union[int, uuid.UUID]:
-        # print("KKKKK", kwargs)
-        smtp = update(self.model).where(self.model.id == id).values(**kwargs).returning(self.model.id)
-        id = await self.session.execute(smtp)
-        await self.session.commit()
-        return id.scalar()
+    async def update_one(self, id: Union[int, uuid.UUID], **kwargs) -> Optional[Base]:
+        # PostgreSQL has RETURNING
+        # smtp = update(self.model).where(self.model.id == id).values(**kwargs).returning(self.model)
+        # obj = await self.session.execute(smtp)
+        # return obj.scalar()
+        # MySQL
+        smtp = update(self.model).where(self.model.id == id).values(**kwargs)
+        await self.session.execute(smtp)
+        obj = await self.get_one_by_id(id)
+        return obj
+    
+    async def delete_one(self, id: Union[int, uuid.UUID]) -> Optional[Base]:
+        # PostgreSQL has RETURNING
+        # smtp = delete(self.model).where(self.model.id == id).returning(self.model)
+        # obj = await self.session.execute(smtp)
+        # return obj.scalar()
+        # MySQL
+        obj = await self.get_one_by_id(id)
+        smtp = delete(self.model).where(self.model.id == id)
+        await self.session.execute(smtp)
+        return obj
 
 
 def transaction(func):

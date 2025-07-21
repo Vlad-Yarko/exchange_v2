@@ -7,7 +7,7 @@ from jwt.exceptions import ExpiredSignatureError, DecodeError, InvalidSubjectErr
 from src.config import settings
 
 
-class Token:
+class JWT:
     algorithm = 'RS256'
     
     def create_token(self, payload: dict) -> str:
@@ -60,4 +60,4 @@ class Token:
         return payload
 
 
-token_worker = Token()
+jwt_manager = JWT()

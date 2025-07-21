@@ -12,14 +12,27 @@ load_dotenv(find_dotenv())
 
 class Settings(BaseSettings):
     
+    # Environment type
     TEST_ENVIRONMENT: str
+    
+    # MySQL database URLs
     MYSQL: str
     TEST_MYSQL: str
+    
+    # Redis database URLs
     REDIS: str
     TEST_REDIS: str
+    
+    # Telegram bot token
     BOT_TOKEN: str
     
+    # mailget credentials
+    MAIL_USERNAME: str
+    MAIL_PASSWORD: str
+    MAIL_FROM: str
+    MAIL_FROM_NAME: str
     
+    # .pem keys for jwt tokens (not from .env)
     PRIVATE_KEY: ClassVar[str] = (BASE_DIR / 'keys/private_key.pem').read_text()
     PUBLIC_KEY: ClassVar[str] = (BASE_DIR / 'keys/public_key.pem').read_text()
     

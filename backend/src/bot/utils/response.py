@@ -4,7 +4,7 @@ from typing import Optional
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 
-from backend.src.bot.utils.keyboard import Keyboard
+from src.bot.utils.keyboard import Keyboard
 
 
 class Response(ABC):

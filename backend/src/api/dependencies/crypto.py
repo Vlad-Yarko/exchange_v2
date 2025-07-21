@@ -21,7 +21,8 @@ class CryptoDependencyFactory(DependencyFactory):
         super().__init__(
             service_dep=service_dep,
             SchemaBody=CryptoBody,
-            SchemaPublic=CryptoPublic
+            SchemaPublic=CryptoPublic,
+            DataSchemaPublic=CryptoSPublic
         )
         
         

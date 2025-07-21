@@ -21,7 +21,8 @@ class CurrencyDependencyFactory(DependencyFactory):
         super().__init__(
             service_dep=service_dep,
             SchemaBody=CurrencyBody,
-            SchemaPublic=CurrencyPublic
+            SchemaPublic=CurrencyPublic,
+            DataSchemaPublic=CurrenciesPublic
         )
         
         
