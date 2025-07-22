@@ -5,6 +5,7 @@ from jwt import encode, decode
 from jwt.exceptions import ExpiredSignatureError, DecodeError, InvalidSubjectError
 
 from src.config import settings
+from src.enums.user import RoleEnum
 
 
 class JWT:
@@ -26,24 +27,26 @@ class JWT:
         )
         return decoded_token
 
-    def create_access_token(self, id: str) -> str:
+    def create_access_token(self, id: str, role: RoleEnum) -> str:
         now = datetime.now(UTC)
         iat = int(now.timestamp())
         exp = int((now + timedelta(minutes=15)).timestamp())
         payload = {
             'sub': id,
+            'role': role,
             'iat': iat,
             'exp': exp
         }
         token = self.create_token(payload)
         return token
 
-    def create_refresh_token(self, id: str, expiration: Optional[int] = None) -> str:
+    def create_refresh_token(self, id: str, role: RoleEnum, expiration: Optional[int] = None) -> str:
         now = datetime.now(UTC)
         iat = int(now.timestamp())
         exp = int((now + timedelta(days=30)).timestamp()) if not expiration else expiration
         payload = {
             'sub': id,
+            'role': role,
             'iat': iat,
             'exp': exp
         }

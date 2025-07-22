@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
 from src.schemas import Authentication403
-from src.schemas.user import UserPublic, UsersPublic, GetUser422, CreateUser422, UpdateUser422, DeleteUser422
-from src.api.dependencies.user import Users, User, CreatedUser, UpdatedUser, DeletedUser
+from src.schemas.user import UserPublic, UsersPublic, LoginUserPublic, RefreshPublic, GetUser422, CreateUser422, UpdateUser422, DeleteUser422, LoginUser400, LoginUser422, RefreshUser400
+from src.api.dependencies.user import Users, User, CreatedUser, UpdatedUser, DeletedUser, LoggedInUser, RefreshedToken
 
 
 router = APIRouter(
@@ -11,20 +11,20 @@ router = APIRouter(
 
 
 @router.get("",
-            summary="Gets users. 💫",
+            summary="Gets users. 💫 (Admins-only⚙️)",
             description="Gets **users** from database with their information via pagination. 💫",
             tags=["User_CRUDs💫"],
             response_model=UsersPublic,
             responses={
                 403: {'model': Authentication403}
             })
-async def get_crypto(data: Users):
+async def get_users(data: Users):
     return data
 
 
-@router.get("/{id}",
+@router.get("/one",
             summary="Gets user. 💫",
-            description="Gets **user** from database with its information. 💫",
+            description="Gets **user** from database with his information. 💫",
             tags=["User_CRUDs💫"],
             response_model=UserPublic,
             responses={
@@ -36,39 +36,64 @@ async def get_user(data: User):
 
 
 @router.post("",
-            summary="Creates crypto currency. 💫",
-            description="Creates **crypto** currency in database with its information. 💫",
+            summary="Creates user. 💫",
+            description="Creates **user** in database with his information. 💫",
             tags=["User_CRUDs💫"],
             response_model=UserPublic,
             responses={
                 403: {'model': Authentication403},
                 422: {'model': CreateUser422}
             })
-async def get_user(data: CreatedUser):
+async def create_user(data: CreatedUser):
     return data
 
 
-@router.put("/{id}",
-            summary="Updates crypto currency. 💫",
-            description="Updates **crypto** currency in database. 💫",
+@router.put("",
+            summary="Updates user. 💫",
+            description="Updates **user** info in database. 💫",
             tags=["User_CRUDs💫"],
             response_model=UserPublic,
             responses={
                 403: {'model': Authentication403},
                 422: {'model': UpdateUser422}
             })
-async def get_user(data: UpdatedUser):
+async def update_user(data: UpdatedUser):
     return data
 
 
 @router.delete("/{id}",
-            summary="Deletes crypto currency. 💫",
-            description="Deletes **crypto** currency from database. 💫",
+            summary="Deletes user. 💫 (Admins-only⚙️)",
+            description="Deletes **user** from database. 💫",
             tags=["User_CRUDs💫"],
             response_model=UserPublic,
             responses={
                 403: {'model': Authentication403},
                 422: {'model': DeleteUser422}
             })
-async def get_user(data: DeletedUser):
+async def delete_user(data: DeletedUser):
+    return data
+
+
+@router.post("/login",
+            summary="Logs user in. 💫",
+            description="**Logs** user in and **issues** refresh token. 💫",
+            tags=["Authentication💫"],
+            response_model=LoginUserPublic,
+            responses={
+                400: {'model': LoginUser400},
+                422: {'model': LoginUser422}
+            })
+async def login_user(data: LoggedInUser):
+    return data
+
+
+@router.post("/refresh",
+            summary="Issues access token. 💫",
+            description="**Issues** access token and **refreshes** refresh token. 💫",
+            tags=["Authentication💫"],
+            response_model=RefreshPublic,
+            responses={
+                400: {'model': RefreshUser400}
+            })
+async def refresh_user(data: RefreshedToken):
     return data

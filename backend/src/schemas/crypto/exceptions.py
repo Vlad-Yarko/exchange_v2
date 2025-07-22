@@ -19,3 +19,19 @@ class UpdateCrypto422(ExceptionSchema):
     
 class DeleteCrypto422(ExceptionSchema):
     detail: Union[str, dict] = Field(..., examples=["Id has not found"])
+    
+    
+class GetCryptoSubscribe422(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["Symbol has not found"])
+
+
+class CreateCryptoSubscribe422(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["Symbols combination has already found"])
+    
+    
+class UpdateCryptoSubscribe422(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["Symbol has not found"])
+    
+    
+class DeleteCryptoSubscribe422(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["Symbol has not found"])

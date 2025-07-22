@@ -5,7 +5,7 @@ from src.schemas.email import EmailPublic, ValidateEmailPublic, IsVerifiedEmailP
 
 
 router = APIRouter(
-    '/emails',
+    prefix='/emails',
     tags=["EMAILs💫"]
 )
 
@@ -39,5 +39,5 @@ async def validate_email_hand(data: ValidatedEmail):
             responses={
                 422: {'model': IsVerifiedEmail422}
             })
-async def validate_email_hand(data: IsVerifiedEmail):
+async def verified_email_hand(data: IsVerifiedEmail):
     return data

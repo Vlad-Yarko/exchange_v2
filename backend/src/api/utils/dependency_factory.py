@@ -37,8 +37,8 @@ class DependencyFactory:
         SchemaBody = self.SchemaBody
         async def dep(
             body: SchemaBody) -> bool:
-            data = await self.email_service.is_verified_email(body.email)
-            check_for_exception(data)
+            # data = await self.email_service.is_verified_email(body.email)
+            # check_for_exception(data)
             return True
         return dep
         
@@ -67,6 +67,7 @@ class DependencyFactory:
     
     def get_dep(self) -> Callable[[], Awaitable[TDataSchemaPublic]]:
         async def dep(
+            token: str = Depends(self.token_dep()),
             page: Optional[int] = Query(None, examples=[1], description="Number of pagination page. 💫", ge=1),
             service: Service = Depends(self.service_dep)) -> TDataSchemaPublic:
             data = await service.get(page)
@@ -81,6 +82,7 @@ class DependencyFactory:
     
     def get_one_dep(self) -> Callable[[], Awaitable[TSchemaPublic]]:
         async def dep(
+            token: str = Depends(self.token_dep()),
             service: Service = Depends(self.service_dep),
             id: int = Path(..., examples=[1], description="Unique identifier of an object. 💫", ge=1)) -> TSchemaPublic:
             data = await service.get_one(id)
@@ -93,6 +95,7 @@ class DependencyFactory:
         SchemaBody = self.SchemaBody
         async def dep(
             body: SchemaBody,
+            token: str = Depends(self.token_dep()),
             service: Service = Depends(self.service_dep)) -> TSchemaPublic:
             data = await service.create_one(body.model_dump())
             check_for_exception(data)
@@ -109,6 +112,7 @@ class DependencyFactory:
         SchemaBody = self.SchemaBody
         async def dep(
             body: SchemaBody,
+            token: str = Depends(self.token_dep()),
             service: Service = Depends(self.service_dep),
             id: int = Path(..., examples=[1], description="Unique identifier of an object. 💫", ge=1)) -> TSchemaPublic:
             data = await service.update_one(id, body.model_dump())
@@ -120,6 +124,7 @@ class DependencyFactory:
     
     def delete_one_dep(self) -> Callable[[], Awaitable[TSchemaPublic]]:
         async def dep(
+            token: str = Depends(self.token_dep()),
             service: Service = Depends(self.service_dep),
             id: int = Path(..., examples=[1], description="Unique identifier of an object. 💫", ge=1)) -> TSchemaPublic:
             data = await service.delete_one(id)

@@ -1,3 +1,4 @@
+from typing import Optional
 import re
 
 from pydantic import Field, EmailStr, field_validator
@@ -8,24 +9,18 @@ from src.enums.user import RoleEnum
 from src.utils.validation import check_phone_number
 
 
-class User(Schema):
+class UserSchema(Schema):
     username: str = Field(..., examples=["mister_business"], min_length=2, max_length=25)
     email: EmailStr = Field(..., examples=["mister_business@gmail.com"])
-    phoneNumber: str = Field(..., examples=["+380999999999"])
     
     @field_validator("username")
     def validate_username(value):
         if not re.fullmatch(r"^[a-zA-Z][a-zA-Z0-9]*(?:[._]?[a-zA-Z0-9]+)*$", value):
             raise ValueError("""Username is invalid. It cannot contain special characters and cannot be ended with: ., _""")
         return value
-
     
-    @field_validator("phoneNumber")
-    def validate_phone_number(value):
-        return check_phone_number(value)
     
-
-class UserBody(User):
+class PasswordSchema(Schema):
     password: str = Field(..., examples=["12345678"], min_length=8, max_length=64)
     
     @field_validator("password")
@@ -35,9 +30,41 @@ class UserBody(User):
         return value
 
 
+class User(UserSchema):
+    phoneNumber: Optional[str] = Field(None, examples=["+380999999999"])
+    
+    @field_validator("phoneNumber")
+    def validate_phone_number(value):
+        return check_phone_number(value)
+
+
+class UserBody(User, PasswordSchema):
+    pass
+
+
 class UserPublic(User, PublicSchema):
     role: RoleEnum = Field(..., examples=[RoleEnum.USER])
 
 
 class UsersPublic(PaginationSchema):
     data: list[UserPublic]
+    
+    
+class LoginUser(UserSchema):
+    pass
+    
+    
+class LoginUserBody(LoginUser, PasswordSchema):
+    pass
+
+
+class LoginUserPublic(LoginUser, PublicSchema):
+    pass
+
+
+class Refresh(Schema):
+    pass
+
+
+class RefreshPublic(Refresh):
+    accessToken: str = Field(..., examples=['asfnbmbmbewrqdijhdsfafgsdhhvbxcbfgerydgsfgagf'])

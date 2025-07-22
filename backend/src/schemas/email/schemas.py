@@ -7,20 +7,19 @@ from src.schemas import PublicSchema
 
 
 class Email(Schema):
-    email: EmailStr
+    email: EmailStr = Field(..., examples=["mister_business@gmail.com"])
 
 
 class EmailBody(Email):
     pass
 
 
-class EmailPublic(Email, PublicSchema):
+class EmailPublic(Email):
     pass
 
 
 class ValidateEmail(Schema):
-    email: EmailStr
-    verified: bool = Field(examples=[True])
+    email: EmailStr = Field(..., examples=["mister_business@gmail.com"])
 
 
 class ValidateEmailBody(ValidateEmail):
@@ -33,8 +32,8 @@ class ValidateEmailBody(ValidateEmail):
         return value
 
 
-class ValidateEmailPublic(ValidateEmail, PublicSchema):
-    pass
+class ValidateEmailPublic(ValidateEmail):
+    verified: bool = Field(examples=[True])
 
 
 class IsVerifiedEmail(Schema):
@@ -42,7 +41,7 @@ class IsVerifiedEmail(Schema):
     
     
 class IsVerifiedEmailBody(IsVerifiedEmail):
-    email: EmailStr
+    email: EmailStr = Field(..., examples=["mister_business@gmail.com"])
     
     
 class IsVerifiedEmailPublic(IsVerifiedEmail):

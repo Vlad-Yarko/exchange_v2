@@ -7,9 +7,33 @@ tags_metadata = [
             "url": "https://github.com/Vlad-Yarko/exchange_v2"
         }
     },
+        {
+        "name": "EMAILs💫",
+        "description": "Basic email management. 💫",
+        "externalDocs": {
+            "description": "EMAIls💫",
+            "url": "https://github.com/Vlad-Yarko/exchange_v2"
+        }
+    },
+    {
+        "name": "Authentication💫",
+        "description": "Basic authentication management. 💫",
+        "externalDocs": {
+            "description": "AUTHENTICATION💫",
+            "url": "https://github.com/Vlad-Yarko/exchange_v2"
+        }
+    },
     {
         "name": "Crypto_CRUDs💫",
         "description": "Basic CRUDs commands for crypto currencies. 💫",
+        "externalDocs": {
+            "description": "CRYPTO💫",
+            "url": "https://github.com/Vlad-Yarko/exchange_v2"
+        }
+    },
+    {
+        "name": "Crypto_subscribes_CRUDs💫",
+        "description": "Basic CRUDs commands for crypto subscribes. 💫",
         "externalDocs": {
             "description": "CRYPTO💫",
             "url": "https://github.com/Vlad-Yarko/exchange_v2"
@@ -23,12 +47,13 @@ tags_metadata = [
             "url": "https://github.com/Vlad-Yarko/exchange_v2"
         }
     },
-        {
-        "name": "EMAILs💫",
-        "description": "Basic email management. 💫",
+    {
+        "name": "Currency_subscribes_CRUDs💫",
+        "description": "Basic CRUDs commands for currency subscribes. 💫",
         "externalDocs": {
-            "description": "EMAIls💫",
+            "description": "CURRENCIEs💫",
             "url": "https://github.com/Vlad-Yarko/exchange_v2"
         }
     }
 ]
+

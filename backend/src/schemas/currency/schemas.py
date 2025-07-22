@@ -23,8 +23,26 @@ class CurrencyBody(Currency):
 
 
 class CurrencyPublic(Currency, PublicSchema):
-    pass
+    symbol: str = Field(..., examples=["USDTUAH"])
 
 
 class CurrenciesPublic(PaginationSchema):
     data: list[CurrencyPublic]
+    
+    
+class CurrencySubscribe(Currency):
+    # userId: int = Field(..., examples=[1], ge=1)
+    pass
+    
+    
+class CurrencySubscribeBody(CurrencySubscribe):
+    pass
+
+
+class CurrencySubscribePublic(CurrencySubscribe, PublicSchema):
+    symbol: str = Field(..., examples=["USDTUAH"])
+    symbolId: int = Field(..., examples=[1], ge=1)
+    
+    
+class CurrencySubscribesPublic(PaginationSchema):
+    data: list[CurrencySubscribePublic]
