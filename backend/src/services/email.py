@@ -3,6 +3,7 @@ import uuid
 
 from src.utils.service import Service
 from src.schemas.email import EmailPublic, EmailBody, ValidateEmailPublic, ValidateEmailBody
+from src.utils.repository import Repository
 
 
 class EmailService(Service):

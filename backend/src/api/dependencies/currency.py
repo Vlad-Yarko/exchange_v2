@@ -4,7 +4,7 @@ from fastapi import Depends, Query, Path
 
 from src.api.utils.dependency_factory import DependencyFactory, check_for_exception
 from src.api.dependencies.db import DBSession
-from src.repositories import CurrencyRepository, CurrencySubscribeRepository
+from src.repositories import CurrencyRepository, CurrencySubscribeRepository, UserRepository
 from src.services import CurrencyService
 from src.schemas.currency import CurrencyBody, CurrencyPublic, CurrenciesPublic, CurrencySubscribeBody, CurrencySubscribePublic, CurrencySubscribesPublic
 
@@ -13,7 +13,8 @@ async def service_dep(session: DBSession) -> CurrencyService:
     return CurrencyService(
         session=session,
         currency_repo=CurrencyRepository,
-        currency_subscribes_repo=CurrencySubscribeRepository
+        currency_subscribes_repo=CurrencySubscribeRepository,
+        user_repo=UserRepository
     )
 
 

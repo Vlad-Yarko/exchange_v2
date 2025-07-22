@@ -66,6 +66,8 @@ class Service:
             data = await self.user_repo(self.session).get_one_by_id(int(payload["sub"]))
             if not data:
                 raise ValueError
+            if not data.role == payload.get('role'):
+                raise ValueError
         except Exception:
-            data = (422, "Invalid token")
+            data = (403, "Access token is invalid")
         return data

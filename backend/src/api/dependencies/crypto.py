@@ -4,7 +4,7 @@ from fastapi import Depends, Path, Query
 
 from src.api.utils.dependency_factory import DependencyFactory, check_for_exception
 from src.api.dependencies.db import DBSession
-from src.repositories import CryptoRepository, CryptoSubscribeRepository
+from src.repositories import CryptoRepository, CryptoSubscribeRepository, UserRepository
 from src.services import CryptoService
 from src.schemas.crypto import CryptoBody, CryptoPublic, CryptoSPublic, CryptoSubscribeBody, CryptoSubscribePublic, CryptoSubscribesPublic
 
@@ -13,7 +13,8 @@ async def service_dep(session: DBSession) -> CryptoService:
     return CryptoService(
         session=session,
         crypto_repo=CryptoRepository,
-        crypto_subscribes_repo=CryptoSubscribeRepository
+        crypto_subscribes_repo=CryptoSubscribeRepository,
+        user_repo=UserRepository
     )
 
 

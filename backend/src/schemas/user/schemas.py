@@ -35,7 +35,9 @@ class User(UserSchema):
     
     @field_validator("phoneNumber")
     def validate_phone_number(value):
-        return check_phone_number(value)
+        if value is not None:
+            return check_phone_number(value)
+        return value
 
 
 class UserBody(User, PasswordSchema):

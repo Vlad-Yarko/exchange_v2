@@ -52,11 +52,7 @@ class DependencyFactory:
                     raise ValueError
                 token = data["credentials"]
                 d = await service.validate_token(token)
-                if isinstance(d, str):
-                    raise HTTPException(
-                        status_code=status.HTTP_403_FORBIDDEN,
-                        detail=d
-                    )
+                check_for_exception(d)
                 return d
             except (ValueError, KeyError):
                 raise HTTPException(

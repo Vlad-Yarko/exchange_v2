@@ -1,12 +1,13 @@
 from typing import Annotated, Callable, Awaitable, Optional
 
-from fastapi import Depends, HTTPException, status, Cookie
+from fastapi import Depends, HTTPException, status, Cookie, Response
 
 from src.api.utils.dependency_factory import DependencyFactory, check_for_exception
 from src.api.dependencies.db import DBSession
 from src.repositories import UserRepository
 from src.services import UserService
 from src.schemas.user import UserBody, UserPublic, UsersPublic, LoginUserBody, LoginUserPublic, RefreshPublic
+from src.enums.user import TokenEnum
 
 
 async def service_dep(session: DBSession) -> UserService:
@@ -57,6 +58,7 @@ class UserDependencyFactory(DependencyFactory):
     
     def login_user_dep(self) -> Callable[[], Awaitable[LoginUserPublic]]:
         async def dep(
+            response: Response,
             body: LoginUserBody,
             service: UserService = Depends(self.service_dep),
             refreshToken: Optional[str] = Cookie(None, examples=[None], description="Refresh token id. (You do not need to pass it). 💫")) -> LoginUserPublic:
@@ -67,12 +69,13 @@ class UserDependencyFactory(DependencyFactory):
                 )
             data = await service.login_user(body.model_dump())
             check_for_exception(data)
-            response = LoginUserPublic(**data)
-            return response
+            self.set_cookie(response, "refreshToken", data.get("tokenId"), TokenEnum.REFRESH_TOKEN_EXP.value)
+            return LoginUserPublic.model_validate(data.get('user'), from_attributes=True)
         return dep
     
     def refresh_user_dep(self) -> Callable[[], Awaitable[RefreshPublic]]:
         async def dep(
+            response: Response,
             service: UserService = Depends(self.service_dep),
             refreshToken: Optional[str] = Cookie(None, examples=[None], description="Refresh token id. (You do not need to pass it). 💫")) -> RefreshPublic:
             if not refreshToken:
@@ -80,10 +83,10 @@ class UserDependencyFactory(DependencyFactory):
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="User is not authenticated. Refresh token has not found"
                 )
-            data = await service.refresh_user()
+            data = await service.refresh_user(refreshToken)
             check_for_exception(data)
-            response = RefreshPublic(**data)
-            return response
+            self.set_cookie(response, "refreshToken", data.get("tokenId"), data.get("exp"))
+            return RefreshPublic(accessToken=data.get("accessToken"))
         return dep
 
 

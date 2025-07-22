@@ -13,12 +13,14 @@ class CryptoService(Service):
         self,
         session: AsyncSession,
         crypto_repo: Repository,
-        crypto_subscribes_repo: Repository
+        crypto_subscribes_repo: Repository,
+        user_repo: Repository
     ):
         super().__init__(session)
         self.repo = crypto_repo
         self.crypto_repo = crypto_repo
         self.crypto_subscribes_repo = crypto_subscribes_repo
+        self.user_repo = user_repo
         
     @transaction
     async def create_one(self, data: CryptoBody) -> Union[dict, tuple[int, str]]:

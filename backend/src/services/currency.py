@@ -13,13 +13,15 @@ class CurrencyService(Service):
         self,
         session: AsyncSession,
         currency_repo: Repository,
-        currency_subscribes_repo: Repository
+        currency_subscribes_repo: Repository,
+        user_repo: Repository
     ):
         super().__init__(session)
         self.repo = currency_repo
         self.currency_repo = currency_repo
         self.currency_subscribes_repo = currency_subscribes_repo
-        
+        self.user_repo = user_repo
+            
     @transaction
     async def create_one(self, data: CurrencyBody) -> Union[dict, tuple[int, str]]:
         symbol = data.get("symbol1") + data.get('symbol2')
