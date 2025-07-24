@@ -23,6 +23,14 @@ tags_metadata = [
             "url": "https://github.com/Vlad-Yarko/exchange_v2"
         }
     },
+        {
+        "name": "PHONE_NUMBERs💫",
+        "description": "Basic phone number management. 💫",
+        "externalDocs": {
+            "description": "PHONE_NUMBERs💫",
+            "url": "https://github.com/Vlad-Yarko/exchange_v2"
+        }
+    },
     {
         "name": "Crypto_CRUDs💫",
         "description": "Basic CRUDs commands for crypto currencies. 💫",
@@ -56,4 +64,3 @@ tags_metadata = [
         }
     }
 ]
-

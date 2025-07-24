@@ -22,11 +22,15 @@ class DeleteUser422(ExceptionSchema):
     
     
 class LoginUser400(ExceptionSchema):
-    detail: Union[str, dict] = Field(..., examples=["User is authenticated. Refresh token has found"])
+    detail: Union[str, dict] = Field(..., examples=["User is not authorized. Refresh token has not found"])
     
     
 class LoginUser422(ExceptionSchema):
     detail: Union[str, dict] = Field(..., examples=["Username has not found"])
+    
+    
+class LogoutUser400(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["User is not authorized. Refresh token has not found"])
     
     
 class RefreshUser400(ExceptionSchema):

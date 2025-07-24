@@ -75,14 +75,15 @@ class SQLAlchemyRepository(Repository):
         return data, total, self.PAGINATION_OFFSET
         
     
-    async def get_one(self, field_name: str, value: Union[int, str, uuid.UUID]) -> Optional[Base]:
-        query = select(self.model).where(getattr(self.model, field_name) == value)
+    async def get_one(self, **kwargs) -> Optional[Base]:
+        conditions = [getattr(self.model, field_name) == value for field_name, value in kwargs.items()]
+        query = select(self.model).where(*conditions)
         data = await self.session.execute(query)
         obj = data.scalar()
         return obj
     
     async def get_one_by_id(self, id: Union[int, uuid.UUID]) -> Optional[Base]:
-        return await self.get_one("id", id)
+        return await self.get_one(id=id)
     
     async def get_latest(self, **kwargs) -> Optional[list[Base]]:
         conditions = self.equal_conditions(**kwargs)

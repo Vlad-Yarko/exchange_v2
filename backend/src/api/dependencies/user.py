@@ -1,13 +1,14 @@
 from typing import Annotated, Callable, Awaitable, Optional
 
-from fastapi import Depends, HTTPException, status, Cookie, Response
+from fastapi import Depends, HTTPException, status, Cookie, Response, Path, Query
 
-from src.api.utils.dependency_factory import DependencyFactory, check_for_exception
+from src.api.utils.dependency_factory import DependencyFactory
 from src.api.dependencies.db import DBSession
 from src.repositories import UserRepository
 from src.services import UserService
-from src.schemas.user import UserBody, UserPublic, UsersPublic, LoginUserBody, LoginUserPublic, RefreshPublic
+from src.schemas.user import UserBody, UserPublic, UsersPublic, LoginUserBody, LoginUserPublic, RefreshPublic, UpdateUserBody
 from src.enums.user import TokenEnum
+from src.models import User as UserModel
 
 
 async def service_dep(session: DBSession) -> UserService:
@@ -23,35 +24,65 @@ class UserDependencyFactory(DependencyFactory):
             service_dep=service_dep,
             SchemaBody=UserBody,
             SchemaPublic=UserPublic,
-            DataSchemaPublic=UsersPublic
+            DataSchemaPublic=UsersPublic,
+            PhoneNumberBody=UpdateUserBody
         )
+        
+    def get_dep(self) -> Callable[[], Awaitable[UsersPublic]]:
+        async def dep(
+            admin: UserModel = Depends(self.admin_dep()),
+            page: int = Depends(self.page_dep()),
+            service: UserService = Depends(self.service_dep)) -> UsersPublic:
+            data = await service.get(page)
+            response = UsersPublic(**data)
+            return response
+        return dep
         
     def get_one_dep(self) -> Callable[[], Awaitable[UserPublic]]:
         async def dep(
-            token: str = Depends(self.token_dep()),
+            user: UserModel = Depends(self.token_dep()),
             service: UserService = Depends(self.service_dep)) -> UserPublic:
-            pass
+            data = await service.get_one(user.id)
+            self.check_for_exception(data)
+            response = UserPublic.model_validate(data, from_attributes=True)
+            return response
         return dep
         
     def create_one_dep(self) -> Callable[[], Awaitable[UserPublic]]:
+        self.email_schema = UserBody
         async def dep(
             body: UserBody,
             service: UserService = Depends(self.service_dep),
             email: bool = Depends(self.verified_email_dep())) -> UserPublic:
             data = await service.create_one(body.model_dump())
-            check_for_exception(data)
+            self.check_for_exception(data)
+            response = UserPublic(**data)
+            return response
+        return dep
+
+
+    def update_one_dep(self) -> Callable[[], Awaitable[UserPublic]]:
+        self.email_schema = UpdateUserBody
+        self.phone_number_schema = UpdateUserBody
+        async def dep(
+            body: UpdateUserBody,
+            user: UserModel = Depends(self.token_dep()),
+            service: UserService = Depends(self.service_dep),
+            email: bool = Depends(self.verified_email_dep()),
+            phone_number: bool = Depends(self.verified_phone_number_dep())) -> UserPublic:
+            data = await service.update_one(user.id, body.model_dump())
+            self.check_for_exception(data)
             response = UserPublic(**data)
             return response
         return dep
     
-    def update_one_dep(self) -> Callable[[], Awaitable[UserPublic]]:
+    def delete_one_dep(self) -> Callable[[], Awaitable[UserPublic]]:
         async def dep(
-            body: UserBody,
-            token: str = Depends(self.token_dep()),
+            admin: UserModel = Depends(self.admin_dep()),
             service: UserService = Depends(self.service_dep),
-            email: bool = Depends(self.verified_email_dep())) -> UserPublic:
-            data = await service.update_one(body.model_dump())
-            check_for_exception(data)
+            id: int = Path(..., examples=[1], description="Unique identifier of an object. 💫", ge=1)) -> UserPublic:
+            data = await service.delete_one(id)
+            self.check_for_exception(data)
             response = UserPublic(**data)
             return response
         return dep
@@ -68,10 +99,27 @@ class UserDependencyFactory(DependencyFactory):
                     detail="User is authenticated. Refresh token has found"
                 )
             data = await service.login_user(body.model_dump())
-            check_for_exception(data)
+            self.check_for_exception(data)
             self.set_cookie(response, "refreshToken", data.get("tokenId"), TokenEnum.REFRESH_TOKEN_EXP.value)
             return LoginUserPublic.model_validate(data.get('user'), from_attributes=True)
         return dep
+    
+    def logout_user_dep(self) -> Callable[[], Awaitable[UserPublic]]:
+        async def dep(
+            response: Response,
+            service: UserService = Depends(self.service_dep),
+            refreshToken: Optional[str] = Cookie(None, examples=[None], description="Refresh token id. (You do not need to pass it). 💫")) -> UserPublic:
+            if not refreshToken:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User is not authorized. Refresh token has not found"
+                )
+            data = await service.logout_user(refreshToken)
+            self.check_for_exception(data)
+            self.delete_cookie(response, "refreshToken")
+            return UserPublic(**data)
+        return dep
+            
     
     def refresh_user_dep(self) -> Callable[[], Awaitable[RefreshPublic]]:
         async def dep(
@@ -80,11 +128,11 @@ class UserDependencyFactory(DependencyFactory):
             refreshToken: Optional[str] = Cookie(None, examples=[None], description="Refresh token id. (You do not need to pass it). 💫")) -> RefreshPublic:
             if not refreshToken:
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="User is not authenticated. Refresh token has not found"
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User is not authorized. Refresh token has not found"
                 )
             data = await service.refresh_user(refreshToken)
-            check_for_exception(data)
+            self.check_for_exception(data)
             self.set_cookie(response, "refreshToken", data.get("tokenId"), data.get("exp"))
             return RefreshPublic(accessToken=data.get("accessToken"))
         return dep
@@ -102,4 +150,5 @@ DeletedUser = Annotated[UserPublic, Depends(dependencies.delete_one_dep())]
 
 # Authentication
 LoggedInUser = Annotated[UsersPublic, Depends(dependencies.login_user_dep())]
+LoggedOutUser = Annotated[UserPublic, Depends(dependencies.logout_user_dep())]
 RefreshedToken = Annotated[RefreshPublic, Depends(dependencies.refresh_user_dep())]

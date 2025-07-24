@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
 from src.schemas import Authentication403
-from src.schemas.user import UserPublic, UsersPublic, LoginUserPublic, RefreshPublic, GetUser422, CreateUser422, UpdateUser422, DeleteUser422, LoginUser400, LoginUser422, RefreshUser400
-from src.api.dependencies.user import Users, User, CreatedUser, UpdatedUser, DeletedUser, LoggedInUser, RefreshedToken
+from src.schemas.user import UserPublic, UsersPublic, LoginUserPublic, RefreshPublic, GetUser422, CreateUser422, UpdateUser422, DeleteUser422, LoginUser400, LoginUser422, LogoutUser400, RefreshUser400
+from src.api.dependencies.user import Users, User, CreatedUser, UpdatedUser, DeletedUser, LoggedInUser, LoggedOutUser, RefreshedToken
 
 
 router = APIRouter(
@@ -41,7 +41,6 @@ async def get_user(data: User):
             tags=["User_CRUDs💫"],
             response_model=UserPublic,
             responses={
-                403: {'model': Authentication403},
                 422: {'model': CreateUser422}
             })
 async def create_user(data: CreatedUser):
@@ -84,6 +83,18 @@ async def delete_user(data: DeletedUser):
                 422: {'model': LoginUser422}
             })
 async def login_user(data: LoggedInUser):
+    return data
+
+
+@router.post("/logout",
+            summary="Logs user out. 💫",
+            description="**Logs** user out and **expires** refresh token. 💫",
+            tags=["Authentication💫"],
+            response_model=UserPublic,
+            responses={
+                400: {'model': LogoutUser400}
+            })
+async def logout_user(data: LoggedOutUser):
     return data
 
 

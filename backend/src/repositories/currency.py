@@ -8,5 +8,5 @@ class CurrencyRepository(SQLAlchemyRepository):
     model = Currency
     
     async def get_one_by_symbol(self, symbol: str) -> Optional[Currency]:
-        data = await self.get_one("symbol", symbol)
+        data = await self.get_one(symbol=symbol)
         return data

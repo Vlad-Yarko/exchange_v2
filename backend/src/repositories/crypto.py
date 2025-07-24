@@ -8,5 +8,5 @@ class CryptoRepository(SQLAlchemyRepository):
     model = Crypto
     
     async def get_one_by_symbol(self, symbol: str) -> Optional[Crypto]:
-        data = await self.get_one("symbol", symbol)
+        data = await self.get_one(symbol=symbol)
         return data

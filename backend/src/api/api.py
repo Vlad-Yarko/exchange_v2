@@ -33,7 +33,8 @@ class API(Application):
             user_router,
             crypto_router,
             currency_router,
-            email_router
+            email_router,
+            phone_number_router
         ]
         self.websockets = [
 

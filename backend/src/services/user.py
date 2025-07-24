@@ -7,7 +7,7 @@ from src.utils.service import Service
 from src.utils.repository import Repository, transaction
 from src.utils.password import pw_manager
 from src.utils.jwt import jwt_manager
-from src.schemas.user import UserBody, LoginUserBody, RefreshPublic
+from src.schemas.user import UserBody, LoginUserBody, RefreshPublic, UpdateUserBody
 from src.enums.user import RoleEnum, TokenEnum
 
 
@@ -36,8 +36,18 @@ class UserService(Service):
         return await super().create_one(data)
     
     @transaction
-    async def update_one(self, id: Union[int, uuid.UUID], data: UserBody) -> Union[dict, tuple[int, str]]:
-        return await super().update_one(id, data)
+    async def update_one(self, id: Union[int, uuid.UUID], data: UpdateUserBody) -> Union[dict, tuple[int, str]]:
+        final_data = dict()   
+        for key, value in data.items():
+            if key != "password" and value is not None:
+                user = await self.user_repo(self.session).get_one(key, value)
+                if user:
+                    return (422, f"{key} has already found")
+                final_data[key] = value
+        if data.get("password") is not None:
+            password = self.pw.hash_password(data.get('password'))
+            final_data["password"] = password
+        return await super().update_one(id, final_data)
     
     @transaction
     async def delete_one(self, id: Union[int, uuid.UUID]) -> Union[dict, tuple[int, str]]:
@@ -71,6 +81,17 @@ class UserService(Service):
         # await self.redis_manager.set_string_data(f"{token_id}:{user.id}", refresh_token, TokenEnum.REFRESH_TOKEN_EXP.value)
         await self.redis_manager.set_string_data(f"{token_id}", refresh_token, TokenEnum.REFRESH_TOKEN_EXP.value)
         return data
+    
+    async def logout_user(self, token_id: str) -> Union[dict, tuple[int, str]]:
+        token = await self.redis_manager.get_string_data(token_id)
+        if not token:
+            return (400, "Token id or user id has not found")
+        payload = self.jwt.validate_token(token)
+        if not payload:
+            return (400, "User is not authenticated. Refresh token has not found")
+        user = await self.user_repo(self.session).get_one_by_id(payload.get("sub"))
+        await self.redis_manager.delete(token_id)
+        return user.to_dict()
     
     async def refresh_user(
         self, 

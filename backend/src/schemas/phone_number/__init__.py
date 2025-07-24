@@ -1,0 +1,2 @@
+from src.schemas.phone_number.schemas import PhoneNumberBody, PhoneNumberPublic, ValidatePhoneNumberBody, ValidatePhoneNumberPublic, IsVerifiedPhoneNumberPublic, IsVerifiedPhoneNumberBody
+from src.schemas.phone_number.exceptions import PhoneNumber422, ValidatePhoneNumber422, IsVerifiedPhoneNumber422

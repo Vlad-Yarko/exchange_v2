@@ -7,7 +7,7 @@ from src.utils.validation import check_upper_case
 
 class Crypto(Schema):
     symbol1: str = Field(..., examples=["BTC"], min_length=1, max_length=20)
-    symbol2: str = Field(..., examples=["USD"], min_length=1, max_length=20)
+    symbol2: str = Field(..., examples=["USDT"], min_length=1, max_length=20)
     
     @field_validator("symbol1")
     def validate_symbol1(value):
@@ -23,7 +23,7 @@ class CryptoBody(Crypto):
 
 
 class CryptoPublic(Crypto, PublicSchema):
-    symbol: str = Field(..., examples=["BTCUSD"])
+    symbol: str = Field(..., examples=["BTCUSDT"])
 
 
 class CryptoSPublic(PaginationSchema):
@@ -39,7 +39,7 @@ class CryptoSubscribeBody(CryptoSubscribe):
 
 
 class CryptoSubscribePublic(CryptoSubscribe, PublicSchema):
-    symbol: str = Field(..., examples=["BTCUSD"])
+    symbol: str = Field(..., examples=["BTCUSDT"])
     symbolId: int = Field(..., examples=[1], ge=1)
     
     

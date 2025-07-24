@@ -44,33 +44,51 @@ class CryptoService(Service):
     async def delete_one(self, id: Union[int, uuid.UUID]) -> Union[dict, tuple[int, str]]:
         return await super().delete_one(id)
     
-    async def subscribes_get(self, page: Optional[int] = None) -> dict:
-        self.repo = self.crypto_subscribes_repo
-        data = await super().get(page)
-        self.repo = self.crypto_repo
-        return data        
+    async def get_subscribe_one(self, user_id: Union[int, uuid.UUID], symbol: str) -> Union[dict, tuple[int, str]]:
+        subscribe = await self.crypto_subscribes_repo(self.session).get_one_id_symbol(user_id, symbol)
+        if not subscribe:
+            return (422, "Symbol has not found")
+        return subscribe
     
-    async def subscribe_get_one(symbol: str) -> dict:
-        pass
+    async def subscribes_get(self, user_id: Union[int, uuid.UUID], page: Optional[int] = None) -> dict:
+        self.repo = self.crypto_subscribes_repo
+        data = await super().get(page, userId=user_id)
+        self.repo = self.crypto_repo
+        return data   
+    
+    async def subscribe_get_one(self, user_id: Union[int, uuid.UUID], symbol: str) -> dict:
+        subscribe = await self.get_subscribe_one(user_id, symbol)
+        if isinstance(subscribe, tuple):
+            return subscribe
+        return subscribe.to_dict()
     
     @transaction
-    async def subscribe_create_one(self, data: CryptoSubscribeBody) -> Union[dict, tuple[int, str]]:
+    async def subscribe_create_one(self, user_id: Union[int, uuid.UUID], data: CryptoSubscribeBody) -> Union[dict, tuple[int, str]]:
         symbol = data.get("symbol1") + data.get('symbol2')
-        d = await self.crypto_repo(self.session).get_one_by_symbol(symbol)
+        d = await self.crypto_subscribes_repo(self.session).get_one_by_id_symbol(user_id, symbol)
         if d:
             return (422, "Symbols combination has already found")
         data['symbol'] = symbol
         return await super().create_one(data)
     
     @transaction
-    async def subscribe_update_one(self, symbol: str, data: CryptoSubscribeBody) -> Union[dict, tuple[int, str]]:
-        symbol = data.get("symbol1") + data.get('symbol2')
-        d = await self.crypto_repo(self.session).get_one_by_symbol(symbol)
+    async def subscribe_update_one(self, user_id: Union[int, uuid.UUID], symbol: str, data: CryptoSubscribeBody) -> Union[dict, tuple[int, str]]:
+        new_symbol = data.get("symbol1") + data.get('symbol2')
+        subscribe = await self.get_subscribe_one(user_id, symbol)
+        if isinstance(subscribe, tuple):
+            return subscribe
+        d = await self.crypto_subscribes_repo(self.session).get_one_by_id_symbol(user_id, symbol)
         if d:
             return (422, "Symbols combination has already found")
-        data['symbol'] = symbol
-        return await super().update_one(id, data)
+        data['symbol'] = new_symbol
+        subscribe = await self.crypto_subscribes_repo(self.session).update_one(subscribe.id, **data)
+        return subscribe.to_dict()
     
     @transaction
-    async def subscribe_delete_one(self, symbol: str) -> Union[dict, tuple[int, str]]:
-        return await super().delete_one(id)
+    async def subscribe_delete_one(self, user_id: Union[int, uuid.UUID], symbol: str) -> Union[dict, tuple[int, str]]:
+        subscribe = await self.get_subscribe_one(user_id, symbol)
+        if isinstance(subscribe, tuple):
+            return subscribe
+        subscribe = await self.crypto_subscribes_repo(self.session).delete_one(subscribe.id)
+        return subscribe.to_dict()
+

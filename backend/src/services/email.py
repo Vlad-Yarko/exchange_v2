@@ -10,14 +10,14 @@ class EmailService(Service):
     def __init__(self):
         super().__init__()
         
-    async def send_email(self, data: EmailBody) -> Union[EmailPublic, tuple[int, str]]:
+    async def send(self, data: EmailBody) -> Union[EmailPublic, tuple[int, str]]:
         pass
     
-    async def validate_email(self, data: ValidateEmailBody) -> Union[ValidateEmailPublic, tuple[int, str]]:
+    async def validate(self, data: ValidateEmailBody) -> Union[ValidateEmailPublic, tuple[int, str]]:
         pass
     
-    async def is_verified_email(self, email: str) -> Union[bool, tuple[int, str]]:
+    async def is_verified(self, email: str) -> Union[bool, tuple[int, str]]:
         pass
-
+    
 
 email_service = EmailService()

@@ -24,3 +24,8 @@ async def main():
     
     
 asyncio.run(main())
+
+
+
+# INSERT INTO users (username, password, email, phoneNumber, role, createdAt, updatedAt) VALUES 
+# ("boba", "12345678zZ&", "boba@gmail.com", "+380888888888", "admin", NOW(), NOW())

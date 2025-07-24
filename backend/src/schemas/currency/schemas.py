@@ -6,7 +6,7 @@ from src.utils.validation import check_upper_case
 
 
 class Currency(Schema):
-    symbol1: str = Field(..., examples=["USDT"], min_length=1, max_length=20)
+    symbol1: str = Field(..., examples=["USD"], min_length=1, max_length=20)
     symbol2: str = Field(..., examples=["UAH"], min_length=1, max_length=20)
     
     @field_validator("symbol1")
@@ -23,7 +23,7 @@ class CurrencyBody(Currency):
 
 
 class CurrencyPublic(Currency, PublicSchema):
-    symbol: str = Field(..., examples=["USDTUAH"])
+    symbol: str = Field(..., examples=["USDUAH"])
 
 
 class CurrenciesPublic(PaginationSchema):
@@ -40,7 +40,7 @@ class CurrencySubscribeBody(CurrencySubscribe):
 
 
 class CurrencySubscribePublic(CurrencySubscribe, PublicSchema):
-    symbol: str = Field(..., examples=["USDTUAH"])
+    symbol: str = Field(..., examples=["USDUAH"])
     symbolId: int = Field(..., examples=[1], ge=1)
     
     

@@ -1,12 +1,14 @@
 from typing import Annotated, Callable, Awaitable, Optional
 
-from fastapi import Depends, Query, Path
+from fastapi import Depends, Query, Path, HTTPException
 
-from src.api.utils.dependency_factory import DependencyFactory, check_for_exception
+from src.api.utils.dependency_factory import DependencyFactory
 from src.api.dependencies.db import DBSession
 from src.repositories import CurrencyRepository, CurrencySubscribeRepository, UserRepository
 from src.services import CurrencyService
 from src.schemas.currency import CurrencyBody, CurrencyPublic, CurrenciesPublic, CurrencySubscribeBody, CurrencySubscribePublic, CurrencySubscribesPublic
+from src.models import User
+from src.utils.validation import check_upper_case
 
 
 async def service_dep(session: DBSession) -> CurrencyService:
@@ -27,24 +29,37 @@ class CurrencyDependencyFactory(DependencyFactory):
             DataSchemaPublic=CurrenciesPublic
         )
         
+    def symbol_dep(self) -> Callable[[], Awaitable[str]]:
+        async def dep(
+            symbol: str = Path(..., examples=["USDUAH"], min_length=2, max_length=50, description="Unique symbol combination. 💫")
+            ) -> str:
+            try:
+                check_upper_case(symbol)
+            except ValueError:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Symbol must be in upper case"
+                )
+            return symbol
+        return dep
         
     def subscribe_get_dep(self) -> Callable[[], Awaitable[CurrencySubscribesPublic]]:
         async def dep(
-            token: str = Depends(self.token_dep()),
-            page: Optional[int] = Query(None, examples=[1], description="Number of pagination page. 💫", ge=1),
+            user: User = Depends(self.token_dep()),
+            page: int = Depends(self.page_dep()),
             service: CurrencyService = Depends(self.service_dep)) -> CurrencySubscribesPublic:
-            data = await service.subscribes_get(page)
+            data = await service.subscribes_get(user.id, page)
             response = CurrencySubscribesPublic(**data)
             return response
         return dep
         
     def subscribe_get_one_dep(self) -> Callable[[], Awaitable[CurrencySubscribePublic]]:
         async def dep(
-            token: str = Depends(self.token_dep()),
+            user: User = Depends(self.token_dep()),
             service: CurrencyService = Depends(self.service_dep),
-            symbol: str = Path(..., examples=["BTCUSD"], min_length=2, max_length=50, description="Unique symbol combination. 💫")):
-            data = await service.subscribe_get_one(symbol)
-            check_for_exception(data)
+            symbol: str = Depends(self.symbol_dep())):
+            data = await service.subscribe_get_one(user.id, symbol)
+            self.check_for_exception(data)
             response = CurrencySubscribePublic(**data)
             return response
         return dep
@@ -52,10 +67,10 @@ class CurrencyDependencyFactory(DependencyFactory):
     def subscribe_create_one_dep(self) -> Callable[[], Awaitable[CurrencySubscribePublic]]:
         async def dep(
             body: CurrencyBody,
-            token: str = Depends(self.token_dep()),
+            user: User = Depends(self.token_dep()),
             service: CurrencyService = Depends(self.service_dep)) -> CurrencySubscribeBody:
-            data = await service.subscribe_create_one(body.model_dump())
-            check_for_exception(data)
+            data = await service.subscribe_create_one(user.id, body.model_dump())
+            self.check_for_exception(data)
             response = CurrencySubscribePublic(**data)
             return response
         return dep
@@ -63,22 +78,22 @@ class CurrencyDependencyFactory(DependencyFactory):
     def subscribe_update_one_dep(self) -> Callable[[], Awaitable[CurrencySubscribePublic]]:
         async def dep(
             body: CurrencyBody,
-            token: str = Depends(self.token_dep()),
+            admin: User = Depends(self.admin_dep()),
             service: CurrencyService = Depends(self.service_dep),
-            symbol: str = Path(..., examples=["BTCUSD"], min_length=2, max_length=50, description="Unique symbol combination. 💫")) -> CurrencySubscribeBody:
-            data = await service.subscribe_update_one(symbol, body.model_dump())
-            check_for_exception(data)
+            symbol: str = Depends(self.symbol_dep())) -> CurrencySubscribeBody:
+            data = await service.subscribe_update_one(admin.id, symbol, body.model_dump())
+            self.check_for_exception(data)
             response = CurrencySubscribePublic(**data)
             return response
         return dep
     
     def subscribe_delete_one_dep(self) -> Callable[[], Awaitable[CurrencySubscribePublic]]:
         async def dep(
-            token: str = Depends(self.token_dep()),
+            user: User = Depends(self.token_dep()),
             service: CurrencyService = Depends(self.service_dep),
-            symbol: str = Path(..., examples=["BTCUSD"], min_length=2, max_length=50, description="Unique symbol combination. 💫")) -> CurrencySubscribeBody:
-            data = await service.subscribe_update_one(symbol)
-            check_for_exception(data)
+            symbol: str = Depends(self.symbol_dep())) -> CurrencySubscribeBody:
+            data = await service.subscribe_delete_one(user.id, symbol)
+            self.check_for_exception(data)
             response = CurrencySubscribePublic(**data)
             return response
         return dep
