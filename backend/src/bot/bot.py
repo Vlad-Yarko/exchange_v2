@@ -5,7 +5,6 @@ from src.config import settings
 from src.bot.commands import commands
 from src.bot.routers import *
 from src.bot.middlewares import DBSession
-from src.databases import sessionmanager
 
 
 class Bot(Application):
@@ -13,8 +12,8 @@ class Bot(Application):
         super().__init__()
         self.token = settings.BOT_TOKEN
         self.dp = Dispatcher()
-        self.dp.message.middleware(DBSession(sessionmanager))
-        self.dp.callback_query.middleware(DBSession(sessionmanager))
+        self.dp.message.middleware(DBSession())
+        self.dp.callback_query.middleware(DBSession())
         self.commands = commands
         self.routers = [
             base_router,
