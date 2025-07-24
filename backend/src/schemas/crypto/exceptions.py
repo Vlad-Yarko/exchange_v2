@@ -22,7 +22,7 @@ class DeleteCrypto422(ExceptionSchema):
     
     
 class GetCryptoSubscribe422(ExceptionSchema):
-    detail: Union[str, dict] = Field(..., examples=["Symbol has not found"])
+    detail: Union[str, dict] = Field(..., examples=["Symbols combination has not found"])
 
 
 class CreateCryptoSubscribe422(ExceptionSchema):
@@ -30,8 +30,8 @@ class CreateCryptoSubscribe422(ExceptionSchema):
     
     
 class UpdateCryptoSubscribe422(ExceptionSchema):
-    detail: Union[str, dict] = Field(..., examples=["Symbol has not found"])
+    detail: Union[str, dict] = Field(..., examples=["Symbols combination has not found"])
     
     
 class DeleteCryptoSubscribe422(ExceptionSchema):
-    detail: Union[str, dict] = Field(..., examples=["Symbol has not found"])
+    detail: Union[str, dict] = Field(..., examples=["Symbols combination has not found"])

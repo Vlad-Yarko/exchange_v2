@@ -22,7 +22,7 @@ class DeleteCurrency422(ExceptionSchema):
     
     
 class GetCurrencySubscribe422(ExceptionSchema):
-    detail: Union[str, dict] = Field(..., examples=["Symbol has not found"])
+    detail: Union[str, dict] = Field(..., examples=["Symbols combination has not found"])
 
 
 class CreateCurrencySubscribe422(ExceptionSchema):
@@ -30,8 +30,8 @@ class CreateCurrencySubscribe422(ExceptionSchema):
     
     
 class UpdateCurrencySubscribe422(ExceptionSchema):
-    detail: Union[str, dict] = Field(..., examples=["Symbol has not found"])
+    detail: Union[str, dict] = Field(..., examples=["Symbols combination has not found"])
     
     
 class DeleteCurrencySubscribe422(ExceptionSchema):
-    detail: Union[str, dict] = Field(..., examples=["Symbol has not found"])
+    detail: Union[str, dict] = Field(..., examples=["Symbols combination has not found"])

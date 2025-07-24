@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.utils.service import Service
 from src.utils.repository import Repository, transaction
 from src.schemas.crypto import CryptoBody, CryptoSubscribeBody
+from src.utils.logger import logger
 
 
 class CryptoService(Service):
@@ -45,9 +46,9 @@ class CryptoService(Service):
         return await super().delete_one(id)
     
     async def get_subscribe_one(self, user_id: Union[int, uuid.UUID], symbol: str) -> Union[dict, tuple[int, str]]:
-        subscribe = await self.crypto_subscribes_repo(self.session).get_one_id_symbol(user_id, symbol)
+        subscribe = await self.crypto_subscribes_repo(self.session).get_one_by_id_symbol(user_id, symbol)
         if not subscribe:
-            return (422, "Symbol has not found")
+            return (422, "Symbols combination has not found")
         return subscribe
     
     async def subscribes_get(self, user_id: Union[int, uuid.UUID], page: Optional[int] = None) -> dict:
@@ -65,22 +66,34 @@ class CryptoService(Service):
     @transaction
     async def subscribe_create_one(self, user_id: Union[int, uuid.UUID], data: CryptoSubscribeBody) -> Union[dict, tuple[int, str]]:
         symbol = data.get("symbol1") + data.get('symbol2')
+        symbol_data = await self.crypto_repo(self.session).get_one_by_symbol(symbol)
+        if not symbol_data:
+            return (422, "Symbols combination has not found")
         d = await self.crypto_subscribes_repo(self.session).get_one_by_id_symbol(user_id, symbol)
         if d:
             return (422, "Symbols combination has already found")
         data['symbol'] = symbol
-        return await super().create_one(data)
+        data['userId'] = user_id
+        data['symbolId'] = symbol_data.id
+        self.repo = self.crypto_subscribes_repo
+        data = await super().create_one(data)
+        self.repo = self.crypto_repo
+        return data   
     
     @transaction
     async def subscribe_update_one(self, user_id: Union[int, uuid.UUID], symbol: str, data: CryptoSubscribeBody) -> Union[dict, tuple[int, str]]:
         new_symbol = data.get("symbol1") + data.get('symbol2')
+        symbol_data = await self.crypto_repo(self.session).get_one_by_symbol(new_symbol)
+        if not symbol_data:
+            return (422, "Symbols combination has not found")
         subscribe = await self.get_subscribe_one(user_id, symbol)
         if isinstance(subscribe, tuple):
             return subscribe
-        d = await self.crypto_subscribes_repo(self.session).get_one_by_id_symbol(user_id, symbol)
+        d = await self.crypto_subscribes_repo(self.session).get_one_by_id_symbol(user_id, new_symbol)
         if d:
             return (422, "Symbols combination has already found")
         data['symbol'] = new_symbol
+        data['symbolId'] = symbol_data.id
         subscribe = await self.crypto_subscribes_repo(self.session).update_one(subscribe.id, **data)
         return subscribe.to_dict()
     

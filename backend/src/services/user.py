@@ -57,9 +57,11 @@ class UserService(Service):
         data = await super().delete_one(id)
         if isinstance(data, tuple):
             return data
-        if data.phoneNumber is not None:
-            telegram_user = await self.telegram_user_repo(self.session).get_one_by_phone_number(data.phoneNumber)
-            await self.telegram_user_repo(self.session).update_one(telegram_user.id, userId=data.id)
+        phone_number = data.get("phoneNumber")
+        if phone_number is not None:
+            telegram_user = await self.telegram_user_repo(self.session).get_one_by_phone_number(phone_number)
+            if telegram_user: 
+                await self.telegram_user_repo(self.session).update_one(telegram_user.id, userId=data.get("id"))
         return data
     
     async def issue_refresh_token(self, id: int, role: RoleEnum, exp: Optional[int] = None) -> str:
@@ -100,7 +102,7 @@ class UserService(Service):
             return (400, "User is not authenticated. Refresh token has not found")
         user = await self.user_repo(self.session).get_one_by_id(payload.get("sub"))
         await self.redis_manager.delete(token_id)
-        return user.to_dict()
+        return user.to_dict() if user else None
     
     async def refresh_user(
         self, 
@@ -112,8 +114,9 @@ class UserService(Service):
         payload = self.jwt.validate_token(token)
         if not payload:
             return (400, "User is not authenticated. Refresh token has not found")
-        # if payload["sub"] != str(user_id):
-        #     return "User id is invalid", status.HTTP_422_UNPROCESSABLE_ENTITY,
+        user = await self.user_repo(self.session).get_one_by_id(int(payload.get("sub")))
+        if not user:
+            return (400, "Token id or user id has not found")
         new_token_id = str(uuid.uuid4())
         expiration_time = payload.get('exp')
         # await self.redis_manager.delete(full_id)

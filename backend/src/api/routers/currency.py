@@ -10,70 +10,6 @@ router = APIRouter(
 )
 
 
-@router.get("",
-            summary="Gets world currencies. 💫 (Protected🗝️)",
-            description="Gets **world** currencies from database with their information via pagination. 💫",
-            tags=["Currency_CRUDs💫"],
-            response_model=CurrenciesPublic,
-            responses={
-                403: {'model': Authentication403}
-            })
-async def get_currencies(data: Currencies):
-    return data
-
-
-@router.get("/{id}",
-            summary="Gets world currency. 💫 (Protected🗝️)",
-            description="Gets **world** currency from database with its information. 💫",
-            tags=["Currency_CRUDs💫"],
-            response_model=CurrencyPublic,
-            responses={
-                403: {'model': Authentication403},
-                422: {'model': GetCurrency422}
-            })
-async def get_currency(data: Currency):
-    return data
-
-
-@router.post("",
-            summary="Creates world currency. 💫 (Admins-only⚙️)",
-            description="Creates **world** currency in database with its information. 💫",
-            tags=["Currency_CRUDs💫"],
-            response_model=CurrencyPublic,
-            responses={
-                403: {'model': Authentication403},
-                422: {'model': CreateCurrency422}
-            })
-async def create_currency(data: CreatedCurrency):
-    return data
-
-
-@router.put("/{id}",
-            summary="Updates world currency. 💫 (Admins-only⚙️)",
-            description="Updates **world** currency in database. 💫",
-            tags=["Currency_CRUDs💫"],
-            response_model=CurrencyPublic,
-            responses={
-                403: {'model': Authentication403},
-                422: {'model': UpdateCurrency422}
-            })
-async def update_currency(data: UpdatedCurrency):
-    return data
-
-
-@router.delete("/{id}",
-            summary="Deletes world currency. 💫 (Admins-only⚙️)",
-            description="Deletes **world** currency from database. 💫",
-            tags=["Currency_CRUDs💫"],
-            response_model=CurrencyPublic,
-            responses={
-                403: {'model': Authentication403},
-                422: {'model': DeleteCurrency422}
-            })
-async def delete_currency(data: DeletedCurrency):
-    return data
-
-
 @router.get("/subscribes",
             summary="Gets currency subscribes. 💫 (Protected🗝️)",
             description="Gets user **currency** subscribes from database with their information via pagination. 💫",
@@ -135,4 +71,68 @@ async def update_currency_subscribe(data: UpdatedCurrencySubscribe):
                 422: {'model': DeleteCurrencySubscribe422}
             })
 async def delete_currency_subscribe(data: DeletedCurrencySubscribe):
+    return data
+
+
+@router.get("",
+            summary="Gets world currencies. 💫 (Protected🗝️)",
+            description="Gets **world** currencies from database with their information via pagination. 💫",
+            tags=["Currency_CRUDs💫"],
+            response_model=CurrenciesPublic,
+            responses={
+                403: {'model': Authentication403}
+            })
+async def get_currencies(data: Currencies):
+    return data
+
+
+@router.get("/{id}",
+            summary="Gets world currency. 💫 (Protected🗝️)",
+            description="Gets **world** currency from database with its information. 💫",
+            tags=["Currency_CRUDs💫"],
+            response_model=CurrencyPublic,
+            responses={
+                403: {'model': Authentication403},
+                422: {'model': GetCurrency422}
+            })
+async def get_currency(data: Currency):
+    return data
+
+
+@router.post("",
+            summary="Creates world currency. 💫 (Admins-only⚙️)",
+            description="Creates **world** currency in database with its information. 💫",
+            tags=["Currency_CRUDs💫"],
+            response_model=CurrencyPublic,
+            responses={
+                403: {'model': Authentication403},
+                422: {'model': CreateCurrency422}
+            })
+async def create_currency(data: CreatedCurrency):
+    return data
+
+
+@router.put("/{id}",
+            summary="Updates world currency. 💫 (Admins-only⚙️)",
+            description="Updates **world** currency in database. 💫",
+            tags=["Currency_CRUDs💫"],
+            response_model=CurrencyPublic,
+            responses={
+                403: {'model': Authentication403},
+                422: {'model': UpdateCurrency422}
+            })
+async def update_currency(data: UpdatedCurrency):
+    return data
+
+
+@router.delete("/{id}",
+            summary="Deletes world currency. 💫 (Admins-only⚙️)",
+            description="Deletes **world** currency from database. 💫",
+            tags=["Currency_CRUDs💫"],
+            response_model=CurrencyPublic,
+            responses={
+                403: {'model': Authentication403},
+                422: {'model': DeleteCurrency422}
+            })
+async def delete_currency(data: DeletedCurrency):
     return data

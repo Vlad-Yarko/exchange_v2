@@ -102,6 +102,10 @@ class LoginUserPublic(LoginUser, PublicSchema):
     pass
 
 
+class LogoutUserPublic(Schema):
+    message: str = Field(..., examples=['OK'])
+
+
 class Refresh(Schema):
     pass
 

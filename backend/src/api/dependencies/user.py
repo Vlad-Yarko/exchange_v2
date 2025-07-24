@@ -1,4 +1,4 @@
-from typing import Annotated, Callable, Awaitable, Optional
+from typing import Annotated, Callable, Awaitable, Optional, Union
 import uuid
 
 from fastapi import Depends, HTTPException, status, Cookie, Response, Path, Query
@@ -7,7 +7,7 @@ from src.api.utils.dependency_factory import DependencyFactory
 from src.api.dependencies.db import DBSession
 from src.repositories import UserRepository, TelegramUserRepository
 from src.services import UserService
-from src.schemas.user import UserBody, UserPublic, UsersPublic, LoginUserBody, LoginUserPublic, RefreshPublic, UpdateUserBody
+from src.schemas.user import UserBody, UserPublic, UsersPublic, LoginUserBody, LoginUserPublic, RefreshPublic, UpdateUserBody, LogoutUserPublic
 from src.enums.user import TokenEnum
 from src.models import User as UserModel
 
@@ -115,7 +115,7 @@ class UserDependencyFactory(DependencyFactory):
             return LoginUserPublic.model_validate(data.get('user'), from_attributes=True)
         return dep
     
-    def logout_user_dep(self) -> Callable[[], Awaitable[UserPublic]]:
+    def logout_user_dep(self) -> Callable[[], Awaitable[Union[UserPublic, LogoutUserPublic]]]:
         async def dep(
             response: Response,
             service: UserService = Depends(self.service_dep),
@@ -129,7 +129,7 @@ class UserDependencyFactory(DependencyFactory):
             data = await service.logout_user(str(refresh_token))
             self.check_for_exception(data)
             self.delete_cookie(response, "refreshToken")
-            return UserPublic(**data)
+            return UserPublic(**data) if data else LogoutUserPublic(message="OK")
         return dep
             
     

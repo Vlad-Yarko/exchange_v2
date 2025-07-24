@@ -12,3 +12,9 @@ sessionmanager = MySQLManager()
 async def get_db_session():
     async with sessionmanager.sessions() as session:
         yield session
+        
+        
+async def db_session():
+    sessionmanager.connect_to_db()
+    async with sessionmanager.sessions() as session:
+        yield session

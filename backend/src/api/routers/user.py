@@ -1,7 +1,9 @@
+from typing import Union
+
 from fastapi import APIRouter
 
 from src.schemas import Authentication403
-from src.schemas.user import UserPublic, UsersPublic, LoginUserPublic, RefreshPublic, GetUser422, CreateUser422, UpdateUser422, DeleteUser422, LoginUser400, LoginUser422, LogoutUser400, RefreshUser400
+from src.schemas.user import UserPublic, UsersPublic, LoginUserPublic, RefreshPublic, GetUser422, CreateUser422, UpdateUser422, DeleteUser422, LoginUser400, LoginUser422, LogoutUser400, RefreshUser400, LogoutUserPublic
 from src.api.dependencies.user import Users, User, CreatedUser, UpdatedUser, DeletedUser, LoggedInUser, LoggedOutUser, RefreshedToken
 
 
@@ -90,7 +92,7 @@ async def login_user(data: LoggedInUser):
             summary="Logs user out. 💫",
             description="**Logs** user out and **expires** refresh token. 💫",
             tags=["Authentication💫"],
-            response_model=UserPublic,
+            response_model=Union[UserPublic, LogoutUserPublic],
             responses={
                 400: {'model': LogoutUser400}
             })
