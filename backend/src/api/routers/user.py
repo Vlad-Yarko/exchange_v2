@@ -23,7 +23,7 @@ async def get_users(data: Users):
 
 
 @router.get("/one",
-            summary="Gets user. 💫",
+            summary="Gets user. 💫 (Protected🗝️)",
             description="Gets **user** from database with his information. 💫",
             tags=["User_CRUDs💫"],
             response_model=UserPublic,
@@ -48,7 +48,7 @@ async def create_user(data: CreatedUser):
 
 
 @router.put("",
-            summary="Updates user. 💫",
+            summary="Updates user. 💫 (Protected🗝️)",
             description="Updates **user** info in database. 💫",
             tags=["User_CRUDs💫"],
             response_model=UserPublic,

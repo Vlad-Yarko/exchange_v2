@@ -1,20 +1,24 @@
 from typing import Annotated, Callable, Awaitable, Optional
+import uuid
 
 from fastapi import Depends, HTTPException, status, Cookie, Response, Path, Query
 
 from src.api.utils.dependency_factory import DependencyFactory
 from src.api.dependencies.db import DBSession
-from src.repositories import UserRepository
+from src.repositories import UserRepository, TelegramUserRepository
 from src.services import UserService
 from src.schemas.user import UserBody, UserPublic, UsersPublic, LoginUserBody, LoginUserPublic, RefreshPublic, UpdateUserBody
 from src.enums.user import TokenEnum
 from src.models import User as UserModel
 
+from src.utils.logger import logger
+
 
 async def service_dep(session: DBSession) -> UserService:
     return UserService(
         session=session,
-        user_repo=UserRepository
+        user_repo=UserRepository,
+        telegram_user_repo=TelegramUserRepository
     )
 
 
@@ -27,6 +31,13 @@ class UserDependencyFactory(DependencyFactory):
             DataSchemaPublic=UsersPublic,
             PhoneNumberBody=UpdateUserBody
         )
+        
+    def refresh_token_dep(self) -> uuid.UUID:
+        async def dep(
+            refreshToken: Optional[uuid.UUID] = Cookie(None, examples=[None], description="Refresh token id. (You do not need to pass it). 💫")            
+        ) -> uuid.UUID:
+            return refreshToken
+        return dep
         
     def get_dep(self) -> Callable[[], Awaitable[UsersPublic]]:
         async def dep(
@@ -92,7 +103,7 @@ class UserDependencyFactory(DependencyFactory):
             response: Response,
             body: LoginUserBody,
             service: UserService = Depends(self.service_dep),
-            refreshToken: Optional[str] = Cookie(None, examples=[None], description="Refresh token id. (You do not need to pass it). 💫")) -> LoginUserPublic:
+            refreshToken: uuid.UUID = Depends(self.refresh_token_dep())) -> LoginUserPublic:
             if refreshToken:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -108,13 +119,14 @@ class UserDependencyFactory(DependencyFactory):
         async def dep(
             response: Response,
             service: UserService = Depends(self.service_dep),
-            refreshToken: Optional[str] = Cookie(None, examples=[None], description="Refresh token id. (You do not need to pass it). 💫")) -> UserPublic:
-            if not refreshToken:
+            refresh_token: uuid.UUID = Depends(self.refresh_token_dep())
+            ) -> UserPublic:
+            if not refresh_token:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="User is not authorized. Refresh token has not found"
                 )
-            data = await service.logout_user(refreshToken)
+            data = await service.logout_user(str(refresh_token))
             self.check_for_exception(data)
             self.delete_cookie(response, "refreshToken")
             return UserPublic(**data)
@@ -125,13 +137,13 @@ class UserDependencyFactory(DependencyFactory):
         async def dep(
             response: Response,
             service: UserService = Depends(self.service_dep),
-            refreshToken: Optional[str] = Cookie(None, examples=[None], description="Refresh token id. (You do not need to pass it). 💫")) -> RefreshPublic:
-            if not refreshToken:
+            refresh_token: uuid.UUID = Depends(self.refresh_token_dep())) -> RefreshPublic:
+            if not refresh_token:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="User is not authorized. Refresh token has not found"
                 )
-            data = await service.refresh_user(refreshToken)
+            data = await service.refresh_user(str(refresh_token))
             self.check_for_exception(data)
             self.set_cookie(response, "refreshToken", data.get("tokenId"), data.get("exp"))
             return RefreshPublic(accessToken=data.get("accessToken"))

@@ -11,7 +11,7 @@ router = APIRouter(
 
 
 @router.get("",
-            summary="Gets world currencies. 💫",
+            summary="Gets world currencies. 💫 (Protected🗝️)",
             description="Gets **world** currencies from database with their information via pagination. 💫",
             tags=["Currency_CRUDs💫"],
             response_model=CurrenciesPublic,
@@ -23,7 +23,7 @@ async def get_currencies(data: Currencies):
 
 
 @router.get("/{id}",
-            summary="Gets world currency. 💫",
+            summary="Gets world currency. 💫 (Protected🗝️)",
             description="Gets **world** currency from database with its information. 💫",
             tags=["Currency_CRUDs💫"],
             response_model=CurrencyPublic,
@@ -75,7 +75,7 @@ async def delete_currency(data: DeletedCurrency):
 
 
 @router.get("/subscribes",
-            summary="Gets currency subscribes. 💫",
+            summary="Gets currency subscribes. 💫 (Protected🗝️)",
             description="Gets user **currency** subscribes from database with their information via pagination. 💫",
             tags=["Currency_subscribes_CRUDs💫"],
             response_model=CurrencySubscribesPublic,
@@ -87,7 +87,7 @@ async def get_currency_subscribes(data: CurrencySubscribes):
 
 
 @router.get("/subscribes/{symbol}",
-            summary="Gets currency subscribe. 💫",
+            summary="Gets currency subscribe. 💫 (Protected🗝️)",
             description="Gets user **currency** subscribe from database with its information. 💫",
             tags=["Currency_subscribes_CRUDs💫"],
             response_model=CurrencySubscribePublic,
@@ -100,7 +100,7 @@ async def get_currency_subscribe(data: CurrencySubscribe):
 
 
 @router.post("/subscribes",
-            summary="Creates currency subscribe. 💫",
+            summary="Creates currency subscribe. 💫 (Protected🗝️)",
             description="Creates user **currency** subscribe in database with its information. 💫",
             tags=["Currency_subscribes_CRUDs💫"],
             response_model=CurrencySubscribePublic,
@@ -126,7 +126,7 @@ async def update_currency_subscribe(data: UpdatedCurrencySubscribe):
 
 
 @router.delete("/subscribes/{symbol}",
-            summary="Deletes currency subscribe. 💫",
+            summary="Deletes currency subscribe. 💫 (Protected🗝️)",
             description="Deletes user **currency** subscribe from database. 💫",
             tags=["Currency_subscribes_CRUDs💫"],
             response_model=CurrencySubscribePublic,

@@ -10,7 +10,7 @@ class GetUser422(ExceptionSchema):
 
 
 class CreateUser422(ExceptionSchema):
-    detail: Union[str, dict] = Field(..., examples=["Phone number is invalid"])
+    detail: Union[str, dict] = Field(..., examples=["Username has already found"])
     
     
 class UpdateUser422(ExceptionSchema):

@@ -11,7 +11,7 @@ router = APIRouter(
 
 
 @router.get("",
-            summary="Gets crypto currencies. 💫",
+            summary="Gets crypto currencies. 💫 (Protected🗝️)",
             description="Gets **crypto** currencies from database with their information via pagination. 💫",
             tags=["Crypto_CRUDs💫"],
             response_model=CryptoSPublic,
@@ -23,7 +23,7 @@ async def get_cryptos(data: CryptoS):
 
 
 @router.get("/{id}",
-            summary="Gets crypto currency. 💫",
+            summary="Gets crypto currency. 💫 (Protected🗝️)",
             description="Gets **crypto** currency from database with its information. 💫",
             tags=["Crypto_CRUDs💫"],
             response_model=CryptoPublic,
@@ -75,7 +75,7 @@ async def delete_crypto(data: DeletedCrypto):
 
 
 @router.get("/subscribes",
-            summary="Gets crypto subscribes. 💫",
+            summary="Gets crypto subscribes. 💫 (Protected🗝️)",
             description="Gets user **crypto** subscribes from database with their information via pagination. 💫",
             tags=["Crypto_subscribes_CRUDs💫"],
             response_model=CryptoSubscribesPublic,
@@ -87,7 +87,7 @@ async def get_crypto_subscribes(data: CryptoSubscribes):
 
 
 @router.get("/subscribes/{symbol}",
-            summary="Gets crypto subscribe. 💫",
+            summary="Gets crypto subscribe. 💫 (Protected🗝️)",
             description="Gets user **crypto** subscribe from database with its information. 💫",
             tags=["Crypto_subscribes_CRUDs💫"],
             response_model=CryptoSubscribePublic,
@@ -100,7 +100,7 @@ async def get_crypto_subscribe(data: CryptoSubscribe):
 
 
 @router.post("/subscribes",
-            summary="Creates crypto subscribe. 💫",
+            summary="Creates crypto subscribe. 💫 (Protected🗝️)",
             description="Creates user **crypto** subscribe in database with its information. 💫",
             tags=["Crypto_subscribes_CRUDs💫"],
             response_model=CryptoSubscribePublic,
@@ -126,7 +126,7 @@ async def update_crypto_subscribe(data: UpdatedCryptoSubscribe):
 
 
 @router.delete("/subscribes/{symbol}",
-            summary="Deletes crypto subscribe. 💫",
+            summary="Deletes crypto subscribe. 💫 (Protected🗝️)",
             description="Deletes user **crypto** subscribe from database. 💫",
             tags=["Crypto_subscribes_CRUDs💫"],
             response_model=CryptoSubscribePublic,

@@ -97,7 +97,7 @@ class DependencyFactory:
             if not user.role == RoleEnum.ADMIN.value:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Not authenticated. Admins-only"
+                    detail="Access denied. Admins-only"
                 )
             return user
         return dep

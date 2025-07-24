@@ -7,6 +7,7 @@ from sqlalchemy import func, select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.base import Base
+from src.utils.logger import logger
 
 
 class Repository(ABC):
@@ -128,11 +129,21 @@ class SQLAlchemyRepository(Repository):
 def transaction(func):
     @wraps(func)
     async def wrapper(self, *args, **kwargs):
+        result = None
+        rollback_needed = False
         try:
-            return await func(self, *args, **kwargs)
-        except Exception:
+            result = await func(self, *args, **kwargs)
+            if isinstance(result, tuple):
+                rollback_needed = True
+            return result
+        except Exception as e:
             await self.session.rollback()
-            raise
+            logger.critical("DATABASE ERROR")
+            logger.critical(str(e))
+            raise ValueError("DATABASE ERROR")
         finally:
-            await self.session.commit()
+            if rollback_needed:
+                await self.session.rollback()
+            else:
+                await self.session.commit()
     return wrapper

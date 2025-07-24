@@ -26,14 +26,15 @@ class Logger:
             filemode=self.filemode,
             format=self.format
         )
+        self.logger = logging
 
-    def make_router_logger(self, t: str, name: str):
-        router_logger = logging.getLogger(f"{t}-{name}")
-        router_logger.setLevel(self.level)
-        file_handler = logging.FileHandler(self.filename, mode=self.filemode)
-        file_handler.setFormatter(logging.Formatter(self.format))
-        router_logger.addHandler(file_handler)
-        return router_logger
+    # def make_router_logger(self, t: str, name: str):
+    #     router_logger = logging.getLogger(f"{t}-{name}")
+    #     router_logger.setLevel(self.level)
+    #     file_handler = logging.FileHandler(self.filename, mode=self.filemode)
+    #     file_handler.setFormatter(logging.Formatter(self.format))
+    #     router_logger.addHandler(file_handler)
+    #     return router_logger
     
     def debug(self, message: str) -> None:
         self.logger.debug(message)
@@ -42,13 +43,13 @@ class Logger:
         self.logger.info(message)
 
     def warning(self, message: str) -> None:
-        self.logger.info(message)
+        self.logger.warning(message)
 
     def error(self, message: str) -> None:
-        self.logger.info(message)
+        self.logger.error(message)
 
     def critical(self, message: str) -> None:
-        self.logger.info(message)
+        self.logger.critical(message)
 
 
 logger = Logger()

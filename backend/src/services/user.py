@@ -7,19 +7,22 @@ from src.utils.service import Service
 from src.utils.repository import Repository, transaction
 from src.utils.password import pw_manager
 from src.utils.jwt import jwt_manager
-from src.schemas.user import UserBody, LoginUserBody, RefreshPublic, UpdateUserBody
+from src.schemas.user import UserBody, LoginUserBody, UpdateUserBody
 from src.enums.user import RoleEnum, TokenEnum
+from src.utils.logger import logger
 
 
 class UserService(Service):
     def __init__(
         self,
         session: AsyncSession,
-        user_repo: Repository
+        user_repo: Repository,
+        telegram_user_repo: Repository
     ):
         super().__init__(session)
         self.repo = user_repo
         self.user_repo = user_repo
+        self.telegram_user_repo = telegram_user_repo
         self.jwt = jwt_manager
         self.pw = pw_manager
     
@@ -37,10 +40,10 @@ class UserService(Service):
     
     @transaction
     async def update_one(self, id: Union[int, uuid.UUID], data: UpdateUserBody) -> Union[dict, tuple[int, str]]:
-        final_data = dict()   
+        final_data = dict()
         for key, value in data.items():
             if key != "password" and value is not None:
-                user = await self.user_repo(self.session).get_one(key, value)
+                user = await self.user_repo(self.session).get_one(**{key: value})
                 if user:
                     return (422, f"{key} has already found")
                 final_data[key] = value
@@ -51,7 +54,13 @@ class UserService(Service):
     
     @transaction
     async def delete_one(self, id: Union[int, uuid.UUID]) -> Union[dict, tuple[int, str]]:
-        return await super().delete_one(id)
+        data = await super().delete_one(id)
+        if isinstance(data, tuple):
+            return data
+        if data.phoneNumber is not None:
+            telegram_user = await self.telegram_user_repo(self.session).get_one_by_phone_number(data.phoneNumber)
+            await self.telegram_user_repo(self.session).update_one(telegram_user.id, userId=data.id)
+        return data
     
     async def issue_refresh_token(self, id: int, role: RoleEnum, exp: Optional[int] = None) -> str:
         token = self.jwt.create_refresh_token(str(id), role, exp)
