@@ -82,3 +82,7 @@ class API(Application):
         )
         server = Server(server_config)
         await server.serve()
+
+
+api = API()
+api.create()

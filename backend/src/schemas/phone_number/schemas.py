@@ -19,7 +19,7 @@ class PhoneNumberBody(PhoneNumber):
 
 
 class PhoneNumberPublic(PhoneNumber):
-    pass
+    expirationTime: int = Field(..., examples=[300])
 
 
 class ValidatePhoneNumber(PhoneNumber):
@@ -31,7 +31,7 @@ class ValidatePhoneNumberBody(PhoneNumber):
     
     @field_validator("code")
     def validate_code(value):
-        if not re.fullmatch(r"^\d{6}$"):
+        if not re.fullmatch(r"^\d{6}$", str(value)):
             raise ValueError("Code must be 6-digit")
         return value
 
@@ -40,11 +40,11 @@ class ValidatePhoneNumberPublic(ValidatePhoneNumber):
     verified: bool = Field(examples=[True])
 
 
-class IsVerifiedPhoneNumber(Schema):
+class IsVerifiedPhoneNumber(PhoneNumber):
     pass
     
     
-class IsVerifiedPhoneNumberBody(IsVerifiedPhoneNumber, PhoneNumber):
+class IsVerifiedPhoneNumberBody(IsVerifiedPhoneNumber):
     pass
     
     

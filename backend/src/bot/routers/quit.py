@@ -10,7 +10,7 @@ from src.bot.middlewares.quit import QuitMiddleware
 
 router = Router()
 router.message.filter(StateFilter('*'))
-router.message.middleware(QuitMiddleware())
+# router.message.middleware(QuitMiddleware())
 
 
 @router.message(QuitFilter())

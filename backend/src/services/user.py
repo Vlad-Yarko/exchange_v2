@@ -47,9 +47,13 @@ class UserService(Service):
                 if user:
                     return (422, f"{key} has already found")
                 final_data[key] = value
-        if data.get("password") is not None:
-            password = self.pw.hash_password(data.get('password'))
+        pw = data.get("password")
+        if pw is not None:
+            password = self.pw.hash_password(pw)
             final_data["password"] = password
+        phone_number = data.get("phoneNumber")
+        if phone_number is not None:
+            await self.telegram_user_repo(self.session).update_one_by_phone_number(phone_number, userId=id)
         return await super().update_one(id, final_data)
     
     @transaction
@@ -57,11 +61,11 @@ class UserService(Service):
         data = await super().delete_one(id)
         if isinstance(data, tuple):
             return data
-        phone_number = data.get("phoneNumber")
-        if phone_number is not None:
-            telegram_user = await self.telegram_user_repo(self.session).get_one_by_phone_number(phone_number)
-            if telegram_user: 
-                await self.telegram_user_repo(self.session).update_one(telegram_user.id, userId=data.get("id"))
+        # phone_number = data.get("phoneNumber")
+        # if phone_number is not None:
+        #     telegram_user = await self.telegram_user_repo(self.session).get_one_by_phone_number(phone_number)
+        #     if telegram_user: 
+        #         await self.telegram_user_repo(self.session).update_one(telegram_user.id, userId=None)
         return data
     
     async def issue_refresh_token(self, id: int, role: RoleEnum, exp: Optional[int] = None) -> str:

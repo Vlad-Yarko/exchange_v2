@@ -8,12 +8,14 @@ class ContactFilter(Filter):
         pass
 
     async def __call__(self, message: Message) -> bool:
-        return message.contact is not None
+        result = message.contact is not None
+        return result
 
 
-class RegisterStateFilter(Filter):
+class AuthorizeStateFilter(Filter):
     def __init__(self, state_name):
         self.state_name = state_name
 
     async def __call__(self, message: Message, state: FSMContext) -> bool:
-        return await state.get_state() == f'RegisterState:{self.state_name}'
+        result = await state.get_state() == f'AuthorizeState:{self.state_name}'
+        return result

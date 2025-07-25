@@ -11,10 +11,10 @@ You are in exchange bot
 help_hand_text = Text("""
 So this telegram bot is official bot of website 'Exchange'
 You can receive messages from your subscribes from web site here!
-To connect your account here you can use /register 
+To connect your account here you can use /authorize 
 """)
 
 
-register_hand_text = Text("""
+authorize_hand_text = Text("""
 Click the button to share your phone number
 """)

@@ -5,11 +5,13 @@ from fastapi import Depends, HTTPException, status, Response, Path, Query
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from src.utils.service import Service
-from src.services.email import email_service
-from src.services.phone_number import phone_number_service
-from src.types.dependency_factory import TSchemaBody, TSchemaPublic, TDataSchemaPublic, TPhoneNumberBody
+from src.services.email import EmailService
+from src.repositories import TelegramUserRepository, UserRepository
+from src.services.phone_number import PhoneNumberService
+from src.types.dependency_factory import TSchemaBody, TSchemaPublic, TDataSchemaPublic, TPhoneNumberBody, TEmailBody
 from src.enums.user import RoleEnum
 from src.models import User
+from src.api.dependencies.db import DBSession
 
 
 class DependencyFactory:
@@ -20,6 +22,7 @@ class DependencyFactory:
         SchemaPublic: Optional[Type[TSchemaPublic]] = None,
         DataSchemaPublic: Optional[Type[TDataSchemaPublic]] = None,
         PhoneNumberBody: Optional[Type[TPhoneNumberBody]] = None,
+        EmailBody: Optional[Type[TEmailBody]] = None,
         alert_func: Optional[Callable[[], Awaitable]] = None
     ):
         self.service_dep = service_dep
@@ -27,12 +30,19 @@ class DependencyFactory:
         self.SchemaPublic = SchemaPublic
         self.DataSchemaPublic = DataSchemaPublic
         self.PhoneNumberBody = PhoneNumberBody
+        self.EmailBody = EmailBody
         self.security = HTTPBearer()
         self.alert_func = alert_func
-        self.email_service = email_service
-        self.phone_number_service = phone_number_service
-        self.email_schema = None
-        self.phone_number_schema = None
+        
+    def phone_number_service_dep(self) -> Callable[[], Awaitable[PhoneNumberService]]:
+        async def dep(
+            session: DBSession) -> PhoneNumberService:
+            return PhoneNumberService(
+                session=session,
+                telegram_user_repo=TelegramUserRepository,
+                user_repo=UserRepository
+            )
+        return dep
         
     def check_for_exception(self, data: Union[dict, str, list, Any]) -> None:
         if isinstance(data, tuple):
@@ -50,11 +60,21 @@ class DependencyFactory:
         return dep
     
     def verified_phone_number_dep(self) -> Callable[[], Awaitable[bool]]:
-        async def dep() -> bool:
-            # self.phone_number_schema
-            # if body.model_dump().get("phoneNumber"):
-            #     data = await self.phone_number_service.is_verified_phone_number(body.phoneNumber)
-            #     self.check_for_exception(data)
+        PhoneNumberBody = self.PhoneNumberBody
+        async def dep(
+                body: PhoneNumberBody,
+                service: PhoneNumberService = Depends(self.phone_number_service_dep()),
+                user: User = Depends(self.token_dep()),
+            ) -> bool:
+            phone_number = body.phoneNumber
+            if phone_number:
+                data = await service.is_verified(user.id, {"phoneNumber": phone_number})
+                self.check_for_exception(data)
+                if phone_number != data.get("phoneNumber"):
+                    raise HTTPException(
+                        status_code=422,
+                        detail="Phone number is not verified"
+                    )
             return True
         return dep
     

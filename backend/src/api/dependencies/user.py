@@ -29,7 +29,8 @@ class UserDependencyFactory(DependencyFactory):
             SchemaBody=UserBody,
             SchemaPublic=UserPublic,
             DataSchemaPublic=UsersPublic,
-            PhoneNumberBody=UpdateUserBody
+            PhoneNumberBody=UpdateUserBody,
+            EmailBody=UpdateUserBody
         )
         
     def refresh_token_dep(self) -> uuid.UUID:

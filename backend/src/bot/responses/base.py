@@ -1,7 +1,7 @@
 from src.bot.utils.response import MessageResponse
 from src.bot.text.base import *
-from src.bot.keyboards.reply.register_reply import register_keyboard
-from src.bot.fsm import RegisterState
+from src.bot.keyboards.reply.authorize import authorize_keyboard
+from src.bot.fsm import AuthorizeState
 
 
 class BaseMessageResponse(MessageResponse):
@@ -13,8 +13,8 @@ class BaseMessageResponse(MessageResponse):
         self.text = help_hand_text.render()
         await self.answer()
 
-    async def register_hand(self):
-        self.text = register_hand_text.render()
-        self.keyboard = register_keyboard
-        await self.state.set_state(RegisterState.active)
+    async def authorize_hand(self):
+        self.text = authorize_hand_text.render()
+        self.keyboard = authorize_keyboard
+        await self.state.set_state(AuthorizeState.active)
         await self.answer()

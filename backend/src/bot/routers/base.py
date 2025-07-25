@@ -26,9 +26,9 @@ async def help_hand(message: Message, state: FSMContext):
     ).help_hand()
 
 
-@router.message(Command('register'))
-async def register_hand(message: Message, state: FSMContext):
+@router.message(Command('authorize'))
+async def authorize_hand(message: Message, state: FSMContext):
     await BaseMessageResponse(
         message=message,
         state=state
-    ).register_hand()
+    ).authorize_hand()

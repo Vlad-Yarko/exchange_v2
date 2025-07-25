@@ -17,9 +17,10 @@ class Bot(Application):
         self.commands = commands
         self.routers = [
             base_router,
-            quit_router,
-            register_router
+            register_router,
+            quit_router
         ]
+        self.dp.include_routers(*self.routers)
         
     def create(self) -> AiogramBot:
         self.app = AiogramBot(
@@ -29,4 +30,8 @@ class Bot(Application):
     
     async def run(self) -> None:
         await self.app.set_my_commands(commands=self.commands)
-        await self.dp.start_polling(self.bot, allowed_updates=self.dp.resolve_used_update_types())
+        await self.dp.start_polling(self.app, allowed_updates=self.dp.resolve_used_update_types())
+        
+        
+bot = Bot()
+bot.create()

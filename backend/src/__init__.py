@@ -1,2 +1,5 @@
-from src.api.api import API
-from src.bot.bot import Bot
+from src.api.api import api
+from src.bot.bot import bot
+
+
+# __all__ = ["bot"]

@@ -17,6 +17,7 @@ class QuitMiddleware(BaseMiddleware):
     ):
         state: FSMContext = data.get("state")
         state = await self.state.get_state()
+        print("OOO", state)
         if state is not None:
             result = await handler(event, data)
             return result

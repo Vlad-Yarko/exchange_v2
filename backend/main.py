@@ -1,19 +1,12 @@
 import asyncio
 
-from src import API, Bot
-
-
-api = API()
-api.create()
-
-bot = Bot()
-bot.create()
+from src import api, bot
 
 
 async def main():
     await asyncio.gather(
-        api.run(),
-        # bot.run()
+        bot.run(),
+        api.run()
     )
 
 
