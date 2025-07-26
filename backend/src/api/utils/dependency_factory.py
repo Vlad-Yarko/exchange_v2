@@ -34,6 +34,15 @@ class DependencyFactory:
         self.security = HTTPBearer()
         self.alert_func = alert_func
         
+    def email_service_dep(self) -> Callable[[], Awaitable[EmailService]]:
+        async def dep(
+            session: DBSession) -> EmailService:
+            return EmailService(
+                session=session,
+                user_repo=UserRepository
+            )
+        return dep
+        
     def phone_number_service_dep(self) -> Callable[[], Awaitable[PhoneNumberService]]:
         async def dep(
             session: DBSession) -> PhoneNumberService:
@@ -52,10 +61,20 @@ class DependencyFactory:
             )
             
     def verified_email_dep(self) -> Callable[[], Awaitable[bool]]:
-        async def dep() -> bool:
-            # self.email_schema
-            # data = await self.email_service.is_verified_email(body.email)
-            # check_for_exception(data)
+        EmailBody = self.EmailBody
+        async def dep(
+            body: EmailBody,
+            service: EmailService = Depends(self.email_service_dep())
+            ) -> bool:
+            email = body.model_dump().get("email")
+            if email:
+                data = await service.is_verified({"email": email})
+                self.check_for_exception(data)
+                if email != data.get("email"):
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        detail="Email is not verified"
+                    )
             return True
         return dep
     
@@ -66,13 +85,13 @@ class DependencyFactory:
                 service: PhoneNumberService = Depends(self.phone_number_service_dep()),
                 user: User = Depends(self.token_dep()),
             ) -> bool:
-            phone_number = body.phoneNumber
+            phone_number = body.model_dump().get("phoneNumber")
             if phone_number:
                 data = await service.is_verified(user.id, {"phoneNumber": phone_number})
                 self.check_for_exception(data)
                 if phone_number != data.get("phoneNumber"):
                     raise HTTPException(
-                        status_code=422,
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                         detail="Phone number is not verified"
                     )
             return True

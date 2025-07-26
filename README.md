@@ -24,6 +24,12 @@ openssl rsa -in backend/src/keys/private_key.pem -pubout -out backend/src/keys/p
 ```
 cd backend
 ```
+
+# DB
+```
+python -m scripts.db.data
+```
+
 ```
 uvicorn main:app
 ```

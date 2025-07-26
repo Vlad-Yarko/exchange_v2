@@ -8,5 +8,5 @@ CRYPTO_SYMBOLS = [
     "BTT", "MTL", "CVC", "PERP", "REN", "FET", "CTSI", "SKL", "DGB", "OGN",
     "AR", "BAND", "SXP", "DODO", "OCEAN", "REEF", "STMX", "VTHO", "CKB", "CELO",
     "XVS", "BADGER", "LIT", "ALICE", "BETA", "QUICK", "SUPER", "TLM", "CHR", "BAKE",
-    "GALA", "UOS", "COTI", "ILV", "LPT", "PLA", "RAY", "MDX", "JOE", "MOVR", 'USDT'
+    "GALA", "UOS", "COTI", "ILV", "LPT", "PLA", "RAY", "MDX", "JOE", "MOVR"
 ]

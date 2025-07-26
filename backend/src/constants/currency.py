@@ -8,8 +8,8 @@ CURRENCY_SYMBOLS = [
     "TWD", "UYU", "DOP", "JMD", "TTD", "BBD", "BZD", "GTQ", "HNL", "NIO",
     "PAB", "CRC", "PYG", "BOB", "BWP", "MZN", "AOA", "ZMW", "MWK", "MUR",
     "SCR", "MVR", "BND", "LAK", "KIP", "KZT", "UZS", "TJS", "AFN", "MNT",
-    "KGS", "LBP", "SYP", "IQD", "YER", "OMR", "MAD", "DZD", "TND", "LYD",
-    "SDG", "SSP", "CDF", "ZAR", "ETB", "DJF", "SZL", "LSL", "GMD", "SLL",
+    "KGS", "LBP", "SYP", "IQD", "YER", "OMR", "DZD", "TND", "LYD",
+    "SDG", "SSP", "CDF", "ETB", "DJF", "SZL", "LSL", "GMD", "SLL",
     "GNF", "XOF", "XAF", "CVE", "MGA", "WST", "TOP", "FJD", "PGK", "SBD",
     "VUV", "BTN", "KPW", "ERN", "SOS"
 ]

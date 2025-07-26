@@ -33,7 +33,7 @@ class PhoneNumberDependencyFactory(DependencyFactory):
             service: PhoneNumberService = Depends(self.service_dep)) -> PhoneNumberPublic:
             data = await service.send(body.model_dump())
             self.check_for_exception(data)
-            self.set_cookie(response, "phoneNumber", data[1], ValidationEnum.EXPIRE_TIME) 
+            self.set_cookie(response, "phoneNumber", data[1], ValidationEnum.EXPIRE_TIME.value) 
             return PhoneNumberPublic(**data[0])
         return dep
     

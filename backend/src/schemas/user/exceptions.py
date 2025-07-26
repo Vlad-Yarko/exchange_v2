@@ -7,10 +7,18 @@ from src.utils.exception_schema import ExceptionSchema
 
 class GetUser422(ExceptionSchema):
     detail: Union[str, dict] = Field(..., examples=["Id has not found"])
+    
+    
+class CreateUser400(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["Email is not verified"])
 
 
 class CreateUser422(ExceptionSchema):
     detail: Union[str, dict] = Field(..., examples=["Username has already found"])
+    
+    
+class UpdateUser400(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["Email is not verified"])
     
     
 class UpdateUser422(ExceptionSchema):

@@ -42,7 +42,7 @@ class UserService(Service):
     async def update_one(self, id: Union[int, uuid.UUID], data: UpdateUserBody) -> Union[dict, tuple[int, str]]:
         final_data = dict()
         for key, value in data.items():
-            if key != "password" and value is not None:
+            if key != "password" and key != "email" and value is not None:
                 user = await self.user_repo(self.session).get_one(**{key: value})
                 if user:
                     return (422, f"{key} has already found")

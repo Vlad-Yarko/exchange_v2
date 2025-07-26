@@ -50,4 +50,3 @@ class IsVerifiedPhoneNumberBody(IsVerifiedPhoneNumber):
     
 class IsVerifiedPhoneNumberPublic(IsVerifiedPhoneNumber):
     verified: bool = Field(examples=[True])
-

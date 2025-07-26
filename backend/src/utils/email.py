@@ -1,6 +1,26 @@
+from typing import Union
+
 from fastapi_mail import ConnectionConfig, MessageSchema, FastMail
 
 from src.config import settings
+
+
+def verification_body(
+        email: str,
+        code: str,
+):
+    return f"""
+<html>
+    <body>
+        <h1>Hello dear {email}</h1>
+        <p>We are very happy for you, nice to meet you</p>
+        <p>But first of all you must verify your email address</p>
+        <h1>{code}</h1>
+        <h3>So above you can see your verification code</h3>
+        <h3>Please keep it safe and do not give it to third parties</h3>
+    </body>
+</html>
+"""
 
 
 class Email:
@@ -35,43 +55,8 @@ class Email:
         )
         await self.mail.send_message(schema)
 
-    async def signup_mail(self, email, code):
-        await self.custom_email([email], 'Exchange Sign up', signup_body(email, code))
-
-    async def change_credentials_mail(self, email, code):
-        await self.custom_email([email], 'Change credentials', credentials_body(email, code))
-
-
-def signup_body(
-        email: str,
-        code: str,
-):
-    return f"""
-<html>
-    <body>
-        <h1>Hello dear {email}</h1>
-        <h5>You have been on our website and wanted to sign up your account</h5>
-        <p>We are very happy about you, nice to meet you</p>
-        <p>But first of all you must verify your email address</p>
-        <h1>{code}</h1>
-        <h3>So above you can see this code</h3>
-        <h3>Please keep it safe and do not give it to third parties</h3>
-    </body>
-</html>
-"""
-
-
-def credentials_body(
-        email: str,
-        code: str
-):
-    return f"""
-<html>
-    <body>
-        <h1>Hello dear {email}</h1>
-        <h3>You want to change your credentials on our site</h3>
-        <h1>{code}</h1>
-        <h3>So here is your email verification code</h3>
-    </body>
-</html>
-"""
+    async def send_verification(self, email: str, code: Union[str, int]):
+        await self.custom_email([email], 'Exchange verification', verification_body(email, code))
+        
+        
+email_manager = Email()

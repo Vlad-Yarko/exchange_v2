@@ -3,7 +3,7 @@ from typing import Union
 from fastapi import APIRouter
 
 from src.schemas import Authentication403
-from src.schemas.user import UserPublic, UsersPublic, LoginUserPublic, RefreshPublic, GetUser422, CreateUser422, UpdateUser422, DeleteUser422, LoginUser400, LoginUser422, LogoutUser400, RefreshUser400, LogoutUserPublic
+from src.schemas.user import UserPublic, UsersPublic, LoginUserPublic, RefreshPublic, GetUser422, CreateUser400, CreateUser422, UpdateUser400, UpdateUser422, DeleteUser422, LoginUser400, LoginUser422, LogoutUser400, RefreshUser400, LogoutUserPublic
 from src.api.dependencies.user import Users, User, CreatedUser, UpdatedUser, DeletedUser, LoggedInUser, LoggedOutUser, RefreshedToken
 
 
@@ -43,6 +43,7 @@ async def get_user(data: User):
             tags=["User_CRUDs💫"],
             response_model=UserPublic,
             responses={
+                400: {'model': CreateUser400},
                 422: {'model': CreateUser422}
             })
 async def create_user(data: CreatedUser):
@@ -55,6 +56,7 @@ async def create_user(data: CreatedUser):
             tags=["User_CRUDs💫"],
             response_model=UserPublic,
             responses={
+                400: {'model': UpdateUser400},
                 403: {'model': Authentication403},
                 422: {'model': UpdateUser422}
             })

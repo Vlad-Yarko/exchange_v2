@@ -15,7 +15,7 @@ class EmailBody(Email):
 
 
 class EmailPublic(Email):
-    pass
+    expirationTime: int = Field(..., examples=[300])
 
 
 class ValidateEmail(Schema):
@@ -27,7 +27,7 @@ class ValidateEmailBody(ValidateEmail):
     
     @field_validator("code")
     def validate_code(value):
-        if not re.fullmatch(r"^\d{6}$"):
+        if not re.fullmatch(r"^\d{6}$", str(value)):
             raise ValueError("Code must be 6-digit")
         return value
 
@@ -36,7 +36,7 @@ class ValidateEmailPublic(ValidateEmail):
     verified: bool = Field(examples=[True])
 
 
-class IsVerifiedEmail(Schema):
+class IsVerifiedEmail(Email):
     pass
     
     

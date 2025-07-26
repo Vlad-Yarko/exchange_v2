@@ -55,6 +55,7 @@ class UsersPublic(PaginationSchema):
     
     
 class UpdateUserBody(Schema):
+    email: EmailStr = Field(..., examples=["mister_business@gmail.com"])
     username: Optional[str] = Field(None, examples=["mister_business"], min_length=2, max_length=25)
     password: Optional[str] = Field(None, examples=["12345678"], min_length=8, max_length=64)
     phoneNumber: Optional[str] = Field(None, examples=["+380999999999"])

@@ -2,15 +2,19 @@ from typing import Annotated, Callable, Awaitable, Optional
 
 from fastapi import Depends, HTTPException, Response, Cookie, HTTPException
 
-from src.api.utils.validation_factory import ValidationDependencyFactory
 from src.services import EmailService
+from src.api.dependencies.db import DBSession
+from src.repositories import UserRepository
 from src.schemas.email import EmailPublic, EmailBody, ValidateEmailPublic, ValidateEmailBody, IsVerifiedEmailBody, IsVerifiedEmailPublic
 from src.api.utils.dependency_factory import DependencyFactory
 from src.enums.validation import ValidationEnum
 
 
-async def service_dep() -> EmailService:
-    return EmailService()
+async def service_dep(session: DBSession) -> EmailService:
+    return EmailService(
+        session=session,
+        user_repo=UserRepository
+    )
 
 
 class EmailDependencyFactory(DependencyFactory):
@@ -26,7 +30,7 @@ class EmailDependencyFactory(DependencyFactory):
             service: EmailService = Depends(self.service_dep)) -> EmailPublic:
             data = await service.send(body.model_dump())
             self.check_for_exception(data)
-            self.set_cookie(response, self.cookie_name, data[1], ValidationEnum.EXPIRE_TIME) 
+            self.set_cookie(response, "email", data[1], ValidationEnum.EXPIRE_TIME.value) 
             return EmailPublic(**data[0])
         return dep
     
@@ -34,13 +38,13 @@ class EmailDependencyFactory(DependencyFactory):
         async def dep(
             body: ValidateEmailBody,
             service: EmailService = Depends(self.service_dep),
-            validationCookie: Optional[str] = Cookie(None, examples=[None], description="Validation id. (You do not need to pass it). 💫")) -> ValidateEmailPublic:
-            if not validationCookie:
+            email: Optional[str] = Cookie(None, examples=[None], description="Validation id. (You do not need to pass it). 💫")) -> ValidateEmailPublic:
+            if not email:
                 raise HTTPException(
                     status_code=400,
                     detail="Validation id has not found"
                 )
-            data = await service.validate(validationCookie, body.model_dump())
+            data = await service.validate(email, body.model_dump())
             self.check_for_exception(data)
             response = ValidateEmailPublic(**data)
             return response
