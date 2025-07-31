@@ -1,0 +1,9 @@
+# Marks issues/PRs as stale after 30 days of no activity, and closes after 7 more
+daysUntilStale: 30
+daysUntilClose: 7
+staleLabel: stale
+exemptLabels:
+  - pinned
+  - security
+onlyLabels:
+  - needs-triage

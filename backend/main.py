@@ -5,7 +5,7 @@ from src import api, bot
 
 async def main():
     await asyncio.gather(
-        bot.run(),
+        # bot.run(),
         api.run()
     )
 

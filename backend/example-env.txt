@@ -1,0 +1,19 @@
+# Environment type
+TEST_ENVIRONMENT=
+
+# MySQL database URLs
+MYSQL=
+TEST_MYSQL=
+
+# Redis database URLs
+REDIS=
+TEST_REDIS=
+
+# Telegram bot token
+BOT_TOKEN=
+
+# mailget credentials
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_FROM=
+MAIL_FROM_NAME=
