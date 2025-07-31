@@ -35,3 +35,7 @@ class UpdateCurrencySubscribe422(ExceptionSchema):
     
 class DeleteCurrencySubscribe422(ExceptionSchema):
     detail: Union[str, dict] = Field(..., examples=["Symbols combination has not found"])
+    
+    
+class GetCurrencyPrice422(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["Symbols combination has not found"])

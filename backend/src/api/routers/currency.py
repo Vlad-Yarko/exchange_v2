@@ -1,13 +1,26 @@
 from fastapi import APIRouter
 
-from src.schemas.currency import CurrencyPublic, CurrenciesPublic, CurrencySubscribePublic, CurrencySubscribesPublic, GetCurrency422, CreateCurrency422, UpdateCurrency422, DeleteCurrency422, GetCurrencySubscribe422, CreateCurrencySubscribe422, DeleteCurrencySubscribe422, UpdateCurrencySubscribe422
+from src.schemas.currency import CurrencyPublic, CurrenciesPublic, CurrencySubscribePublic, CurrencySubscribesPublic, GetCurrency422, CreateCurrency422, UpdateCurrency422, DeleteCurrency422, GetCurrencySubscribe422, CreateCurrencySubscribe422, DeleteCurrencySubscribe422, UpdateCurrencySubscribe422, CurrencyPricePublic, GetCurrencyPrice422
 from src.schemas import Authentication403
-from src.api.dependencies.currency import Currencies, Currency, CreatedCurrency, UpdatedCurrency, DeletedCurrency, CurrencySubscribes, CurrencySubscribe, CreatedCurrencySubscribe, UpdatedCurrencySubscribe, DeletedCurrencySubscribe
+from src.api.dependencies.currency import CurrencyPrice, Currencies, Currency, CreatedCurrency, UpdatedCurrency, DeletedCurrency, CurrencySubscribes, CurrencySubscribe, CreatedCurrencySubscribe, UpdatedCurrencySubscribe, DeletedCurrencySubscribe
 
 
 router = APIRouter(
     prefix='/currency'
 )
+
+
+@router.post("/price",
+            summary="Gets price. 💫 (Protected🗝️)",
+            description="Gets **current** world currency price by symbol. 💫",
+            tags=["Market_data💫"],
+            response_model=CurrencyPricePublic,
+            responses={
+                403: {'model': Authentication403},
+                422: {'model': GetCurrencyPrice422}
+            })
+async def get_currency_price(data: CurrencyPrice):
+    return data
 
 
 @router.get("/subscribes",

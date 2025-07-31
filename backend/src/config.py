@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     MAIL_FROM: str
     MAIL_FROM_NAME: str
     
+    # https://api.exchangerate.host/
+    EXCHANGERATE_API_KEY: str
+    
     # .pem keys for jwt tokens (not from .env)
     PRIVATE_KEY: ClassVar[str] = (BASE_DIR / 'keys/private_key.pem').read_text()
     PUBLIC_KEY: ClassVar[str] = (BASE_DIR / 'keys/public_key.pem').read_text()

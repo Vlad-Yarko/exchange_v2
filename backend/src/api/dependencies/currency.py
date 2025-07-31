@@ -1,12 +1,13 @@
-from typing import Annotated, Callable, Awaitable, Optional
+from typing import Annotated, Callable, Awaitable
 
-from fastapi import Depends, Query, Path, HTTPException
+from fastapi import Depends, Path, HTTPException
 
 from src.api.utils.dependency_factory import DependencyFactory
 from src.api.dependencies.db import DBSession
 from src.repositories import CurrencyRepository, CurrencySubscribeRepository, UserRepository
+from src.clients import CurrencyClient
 from src.services import CurrencyService
-from src.schemas.currency import CurrencyBody, CurrencyPublic, CurrenciesPublic, CurrencySubscribeBody, CurrencySubscribePublic, CurrencySubscribesPublic
+from src.schemas.currency import CurrencyBody, CurrencyPublic, CurrenciesPublic, CurrencySubscribeBody, CurrencySubscribePublic, CurrencySubscribesPublic, CurrencyPricePublic, CurrencyPriceBody
 from src.models import User
 from src.utils.validation import check_upper_case
 
@@ -14,6 +15,7 @@ from src.utils.validation import check_upper_case
 async def service_dep(session: DBSession) -> CurrencyService:
     return CurrencyService(
         session=session,
+        currency_client=CurrencyClient(),
         currency_repo=CurrencyRepository,
         currency_subscribes_repo=CurrencySubscribeRepository,
         user_repo=UserRepository
@@ -41,6 +43,17 @@ class CurrencyDependencyFactory(DependencyFactory):
                     detail="Symbol must be in upper case"
                 )
             return symbol
+        return dep
+    
+    def get_price_dep(self) -> Callable[[], Awaitable[CurrencyPricePublic]]:
+        async def dep(
+            body: CurrencyPriceBody,
+            user: User = Depends(self.token_dep()),
+            service: CurrencyService = Depends(self.service_dep)) -> CurrencyPricePublic:
+            data = await service.get_price(body.model_dump())
+            self.check_for_exception(data)
+            response = CurrencyPricePublic(**data)
+            return response
         return dep
         
     def subscribe_get_dep(self) -> Callable[[], Awaitable[CurrencySubscribesPublic]]:
@@ -101,6 +114,10 @@ class CurrencyDependencyFactory(DependencyFactory):
         
 dependencies = CurrencyDependencyFactory()
 
+
+# Prices
+
+CurrencyPrice = Annotated[CurrencyPricePublic, Depends(dependencies.get_price_dep())]
 
 # CRUDs
 Currencies = Annotated[CurrenciesPublic, Depends(dependencies.get_dep())]

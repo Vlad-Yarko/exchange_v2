@@ -2,12 +2,25 @@ from fastapi import APIRouter
 
 from src.schemas.crypto import *
 from src.schemas import Authentication403
-from src.api.dependencies.crypto import CryptoS, Crypto, CreatedCrypto, UpdatedCrypto, DeletedCrypto, CryptoSubscribes, CryptoSubscribe, CreatedCryptoSubscribe, UpdatedCryptoSubscribe, DeletedCryptoSubscribe
+from src.api.dependencies.crypto import CryptoPrice, CryptoS, Crypto, CreatedCrypto, UpdatedCrypto, DeletedCrypto, CryptoSubscribes, CryptoSubscribe, CreatedCryptoSubscribe, UpdatedCryptoSubscribe, DeletedCryptoSubscribe
 
 
 router = APIRouter(
     prefix='/crypto'
 )
+
+
+@router.post("/price",
+            summary="Gets price. 💫 (Protected🗝️)",
+            description="Gets **current** crypto currency price by symbol. 💫",
+            tags=["Market_data💫"],
+            response_model=CryptoPricePublic,
+            responses={
+                403: {'model': Authentication403},
+                422: {'model': GetCryptoPrice422}
+            })
+async def get_crypto_price(data: CryptoPrice):
+    return data
 
 
 @router.get("/subscribes",

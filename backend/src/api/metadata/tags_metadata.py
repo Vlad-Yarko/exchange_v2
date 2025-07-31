@@ -62,5 +62,13 @@ tags_metadata = [
             "description": "CURRENCIEs💫",
             "url": "https://github.com/Vlad-Yarko/exchange_v2"
         }
-    }
+    },
+    {
+        "name": "Market_data💫",
+        "description": "Basic endpoints for getting all current prices of different currencies. 💫",
+        "externalDocs": {
+            "description": "Market_data💫",
+            "url": "https://github.com/Vlad-Yarko/exchange_v2"
+        }
+    },
 ]

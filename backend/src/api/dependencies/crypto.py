@@ -1,12 +1,13 @@
-from typing import Annotated, Callable, Awaitable, Optional
+from typing import Annotated, Callable, Awaitable
 
-from fastapi import Depends, Path, Query, HTTPException
+from fastapi import Depends, Path, HTTPException
 
 from src.api.utils.dependency_factory import DependencyFactory
 from src.api.dependencies.db import DBSession
 from src.repositories import CryptoRepository, CryptoSubscribeRepository, UserRepository
+from src.clients import CryptoClient
 from src.services import CryptoService
-from src.schemas.crypto import CryptoBody, CryptoPublic, CryptoSPublic, CryptoSubscribeBody, CryptoSubscribePublic, CryptoSubscribesPublic
+from src.schemas.crypto import CryptoBody, CryptoPublic, CryptoSPublic, CryptoSubscribeBody, CryptoSubscribePublic, CryptoSubscribesPublic, CryptoPricePublic, CryptoPriceBody
 from src.models import User
 from src.utils.validation import check_upper_case
 
@@ -14,6 +15,7 @@ from src.utils.validation import check_upper_case
 async def service_dep(session: DBSession) -> CryptoService:
     return CryptoService(
         session=session,
+        crypto_client=CryptoClient(),
         crypto_repo=CryptoRepository,
         crypto_subscribes_repo=CryptoSubscribeRepository,
         user_repo=UserRepository
@@ -41,6 +43,17 @@ class CryptoDependencyFactory(DependencyFactory):
                     detail="Symbol must be in upper case"
                 )
             return symbol
+        return dep
+        
+    def get_price_dep(self) -> Callable[[], Awaitable[CryptoPricePublic]]:
+        async def dep(
+            body: CryptoPriceBody,
+            user: User = Depends(self.token_dep()),
+            service: CryptoService = Depends(self.service_dep)) -> CryptoPricePublic:
+            data = await service.get_price(body.model_dump())
+            self.check_for_exception(data)
+            response = CryptoPricePublic(**data)
+            return response
         return dep
         
     def subscribe_get_dep(self) -> Callable[[], Awaitable[CryptoSubscribesPublic]]:
@@ -102,6 +115,10 @@ class CryptoDependencyFactory(DependencyFactory):
         
 dependencies = CryptoDependencyFactory()
 
+
+# Prices
+
+CryptoPrice = Annotated[CryptoPricePublic, Depends(dependencies.get_price_dep())]
 
 # CRUDs
 CryptoS = Annotated[CryptoSPublic, Depends(dependencies.get_dep())]
