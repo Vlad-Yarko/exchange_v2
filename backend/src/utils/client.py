@@ -64,7 +64,7 @@ class JSONClient(Client):
         return None
         
     async def post(self) -> Union[list, dict, None]:
-        response = await super().get()
+        response = await super().post()
         if response.status == 200:
             return await response.json()
         return None

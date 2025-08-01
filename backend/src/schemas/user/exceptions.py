@@ -29,6 +29,18 @@ class DeleteUser422(ExceptionSchema):
     detail: Union[str, dict] = Field(..., examples=["Id has not found"])
     
     
+class GoogleUrl400(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["User is not authorized. Refresh token has not found"])
+    
+    
+class GoogleCallback400(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["User is not authorized. Refresh token has not found"])
+    
+
+class GoogleCallback422(ExceptionSchema):
+    detail: Union[str, dict] = Field(..., examples=["Invalid google code has sent"])
+    
+    
 class LoginUser400(ExceptionSchema):
     detail: Union[str, dict] = Field(..., examples=["User is not authorized. Refresh token has not found"])
     

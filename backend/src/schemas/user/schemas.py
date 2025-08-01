@@ -13,12 +13,6 @@ class UserSchema(Schema):
     username: str = Field(..., examples=["mister_business"], min_length=2, max_length=25)
     email: EmailStr = Field(..., examples=["mister_business@gmail.com"])
     
-    @field_validator("username")
-    def validate_username(value):
-        if not re.fullmatch(r"^[a-zA-Z][a-zA-Z0-9]*(?:[._]?[a-zA-Z0-9]+)*$", value):
-            raise ValueError("""Username is invalid. It cannot contain special characters and cannot be ended with: ., _""")
-        return value
-    
     
 class PasswordSchema(Schema):
     password: str = Field(..., examples=["12345678"], min_length=8, max_length=64)
@@ -42,7 +36,12 @@ class User(UserSchema):
 
 
 class UserBody(User, PasswordSchema):
-    pass
+    
+    @field_validator("username")
+    def validate_username(value):
+        if not re.fullmatch(r"^[a-zA-Z][a-zA-Z0-9]*(?:[._]?[a-zA-Z0-9]+)*$", value):
+            raise ValueError("""Username is invalid. It cannot contain special characters and cannot be ended with: ., _""")
+        return value
 
 
 class UserPublic(User, PublicSchema):
@@ -91,12 +90,28 @@ class UpdateUserBody(Schema):
         return value
     
     
+class CallbackGoogle(Schema):
+    pass
+
+
+class CallbackGoogleBody(CallbackGoogle):
+    code: str = Field(..., examples=["sdadadfa"])
+    
+    
+class CallbackGooglePublic(UserSchema, PublicSchema):
+    pass
+    
+    
 class LoginUser(UserSchema):
     pass
     
     
 class LoginUserBody(LoginUser, PasswordSchema):
-    pass
+    @field_validator("username")
+    def validate_username(value):
+        if not re.fullmatch(r"^[a-zA-Z][a-zA-Z0-9]*(?:[._]?[a-zA-Z0-9]+)*$", value):
+            raise ValueError("""Username is invalid. It cannot contain special characters and cannot be ended with: ., _""")
+        return value
 
 
 class LoginUserPublic(LoginUser, PublicSchema):

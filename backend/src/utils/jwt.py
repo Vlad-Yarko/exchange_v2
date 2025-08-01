@@ -61,6 +61,14 @@ class JWT:
         except (ExpiredSignatureError, DecodeError, InvalidSubjectError):
             return None
         return payload
+    
+    def decode_oauth2_token(self, token: str) -> dict:
+        decoded_token = decode(
+            jwt=token,
+            algorithms=["RS256"],
+            options={"verify_signature": False} # It must be changed
+        )
+        return decoded_token
 
 
 jwt_manager = JWT()

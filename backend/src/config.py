@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     # https://api.exchangerate.host/
     EXCHANGERATE_API_KEY: str
     
+    # Google cloud
+    GOOGLE_CLIENT_SECRET: str
+    GOOGLE_CLIENT_ID: str
+    
     # .pem keys for jwt tokens (not from .env)
     PRIVATE_KEY: ClassVar[str] = (BASE_DIR / 'keys/private_key.pem').read_text()
     PUBLIC_KEY: ClassVar[str] = (BASE_DIR / 'keys/public_key.pem').read_text()

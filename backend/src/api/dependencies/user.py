@@ -1,22 +1,23 @@
 from typing import Annotated, Callable, Awaitable, Optional, Union
 import uuid
 
-from fastapi import Depends, HTTPException, status, Cookie, Response, Path, Query
+from fastapi import Depends, HTTPException, status, Cookie, Response, Path
+from fastapi.responses import RedirectResponse
 
 from src.api.utils.dependency_factory import DependencyFactory
 from src.api.dependencies.db import DBSession
+from src.clients import Oauth2Client
 from src.repositories import UserRepository, TelegramUserRepository
 from src.services import UserService
-from src.schemas.user import UserBody, UserPublic, UsersPublic, LoginUserBody, LoginUserPublic, RefreshPublic, UpdateUserBody, LogoutUserPublic
+from src.schemas.user import UserBody, UserPublic, UsersPublic, CallbackGoogleBody, CallbackGooglePublic, LoginUserBody, LoginUserPublic, RefreshPublic, UpdateUserBody, LogoutUserPublic
 from src.enums.user import TokenEnum
 from src.models import User as UserModel
-
-from src.utils.logger import logger
 
 
 async def service_dep(session: DBSession) -> UserService:
     return UserService(
         session=session,
+        oauth2_client=Oauth2Client(),
         user_repo=UserRepository,
         telegram_user_repo=TelegramUserRepository
     )
@@ -104,6 +105,40 @@ class UserDependencyFactory(DependencyFactory):
             return response
         return dep
     
+    def google_url_dep(self) -> Callable[[], Awaitable[RedirectResponse]]:
+        async def dep(
+            service: UserService = Depends(self.service_dep),
+            refreshToken: uuid.UUID = Depends(self.refresh_token_dep())
+        ) -> RedirectResponse:
+            if refreshToken:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User is authenticated. Refresh token has found"
+                )
+            data = await service.google_url()
+            self.check_for_exception(data)
+            response = RedirectResponse(url=data, status_code=status.HTTP_302_FOUND)
+            return response
+        return dep
+    
+    def google_callback_dep(self) -> Callable[[], Awaitable[CallbackGooglePublic]]:
+        async def dep(
+            response: Response,
+            body: CallbackGoogleBody,
+            service: UserService = Depends(self.service_dep),
+            refreshToken: uuid.UUID = Depends(self.refresh_token_dep())
+        ) -> CallbackGooglePublic:
+            if refreshToken:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User is authenticated. Refresh token has found"
+                )
+            data = await service.google_callback(body.model_dump().get("code"))
+            self.check_for_exception(data)
+            self.set_cookie(response, "refreshToken", data.get("tokenId"), TokenEnum.REFRESH_TOKEN_EXP.value)
+            return CallbackGooglePublic(**data.get('user'))
+        return dep
+    
     def login_user_dep(self) -> Callable[[], Awaitable[LoginUserPublic]]:
         async def dep(
             response: Response,
@@ -167,6 +202,9 @@ UpdatedUser = Annotated[UserPublic, Depends(dependencies.update_one_dep())]
 DeletedUser = Annotated[UserPublic, Depends(dependencies.delete_one_dep())]
 
 # Authentication
+# Cannot do like this
+# GoogleUrl = Annotated[RedirectResponse, Depends(dependencies.google_url_dep())]
+GoogleLoggedInUser = Annotated[CallbackGooglePublic, Depends(dependencies.google_callback_dep())]
 LoggedInUser = Annotated[UsersPublic, Depends(dependencies.login_user_dep())]
 LoggedOutUser = Annotated[UserPublic, Depends(dependencies.logout_user_dep())]
 RefreshedToken = Annotated[RefreshPublic, Depends(dependencies.refresh_user_dep())]

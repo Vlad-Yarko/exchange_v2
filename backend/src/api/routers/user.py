@@ -1,10 +1,22 @@
 from typing import Union
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from fastapi.responses import RedirectResponse
 
 from src.schemas import Authentication403
-from src.schemas.user import UserPublic, UsersPublic, LoginUserPublic, RefreshPublic, GetUser422, CreateUser400, CreateUser422, UpdateUser400, UpdateUser422, DeleteUser422, LoginUser400, LoginUser422, LogoutUser400, RefreshUser400, LogoutUserPublic
-from src.api.dependencies.user import Users, User, CreatedUser, UpdatedUser, DeletedUser, LoggedInUser, LoggedOutUser, RefreshedToken
+from src.schemas.user import *
+from src.api.dependencies.user import (
+    dependencies, 
+    Users, 
+    User, 
+    CreatedUser, 
+    UpdatedUser, 
+    DeletedUser, 
+    GoogleLoggedInUser, 
+    LoggedInUser, 
+    LoggedOutUser, 
+    RefreshedToken
+)
 
 
 router = APIRouter(
@@ -75,6 +87,32 @@ async def update_user(data: UpdatedUser):
             })
 async def delete_user(data: DeletedUser):
     return data
+
+
+@router.get("/google/url",
+            summary="Gets google redirect url. 💫",
+            description="Gets **google** redirection url for oauth 2.0 authentication",
+            tags=["Authentication💫"],
+            response_class=RedirectResponse,
+            responses={
+                "400": {'model': GoogleUrl400}
+            })
+async def google_url_hand(data = Depends(dependencies.google_url_dep())):
+    return data
+
+
+@router.post("/google/callback",
+            summary="Logs user in",
+            description="**Logs** user in via oauth 2.0 protocol (google) and **issues** refresh token. 💫",
+            tags=["Authentication💫"],
+            response_model=CallbackGooglePublic,
+            responses={
+                400: {'model': GoogleCallback400},
+                422: {'model': GoogleCallback422}
+            })
+async def google_callback_hand(data: GoogleLoggedInUser):
+    return data
+
 
 
 @router.post("/login",

@@ -7,15 +7,18 @@ from src.utils.service import Service
 from src.utils.repository import Repository, transaction
 from src.utils.password import pw_manager
 from src.utils.jwt import jwt_manager
+from src.utils.oauth2 import oauth2
+from src.utils.client import JSONClient, http_session
 from src.schemas.user import UserBody, LoginUserBody, UpdateUserBody
 from src.enums.user import RoleEnum, TokenEnum
-from src.utils.logger import logger
+from src.clients import Oauth2Client
 
 
 class UserService(Service):
     def __init__(
         self,
         session: AsyncSession,
+        oauth2_client: JSONClient,
         user_repo: Repository,
         telegram_user_repo: Repository
     ):
@@ -25,6 +28,8 @@ class UserService(Service):
         self.telegram_user_repo = telegram_user_repo
         self.jwt = jwt_manager
         self.pw = pw_manager
+        self.oauth_manager = oauth2
+        self.client = oauth2_client
     
     @transaction
     async def create_one(self, data: UserBody) -> Union[dict, tuple[int, str]]:
@@ -76,6 +81,35 @@ class UserService(Service):
         token = self.jwt.create_access_token(str(id), role)
         return token
     
+    async def google_url(self) -> str:
+        redirect_uri = self.oauth_manager.google_url_redirect()
+        return redirect_uri
+    
+    @http_session
+    @transaction
+    async def google_callback(self, code: str) -> Union[dict, tuple[int, str]]:
+        oauth2_data = await self.client.get_google_data(code)
+        if not oauth2_data:
+            return (422, "Invalid google code has sent")
+        id_token = oauth2_data.get("id_token")
+        oauth2_user_data = self.jwt.decode_oauth2_token(id_token)
+        email = oauth2_user_data.get("email")
+        user = await self.user_repo(self.session).get_one_by_email(email)
+        if not user:
+            user_data = dict()
+            user_data["email"] = email
+            user_data["username"] = email.split("@")[0] + "@"
+            user = await super().create_one(user_data)
+        else:
+            user = user.to_dict()
+        refresh_token = await self.issue_refresh_token(user.get("id"), user.get("role"))
+        data = dict()
+        token_id = str(uuid.uuid4())
+        data["user"] = user
+        data["tokenId"] = token_id
+        await self.redis_manager.set_string_data(f"{token_id}", refresh_token, TokenEnum.REFRESH_TOKEN_EXP.value)
+        return data
+    
     async def login_user(self, data: LoginUserBody) -> Union[dict, tuple[int, str]]:
         user = await self.user_repo(self.session).get_one_by_username(data.get("username"))
         if not user:
@@ -85,6 +119,8 @@ class UserService(Service):
             return (422, "Email has not found")
         if isinstance(user, tuple):
             return user
+        if not user.password:
+            return (422, "User was authenticated via oauth 2.0")
         is_correct_pw = self.pw.check_password(data.get("password"), user.password)
         if not is_correct_pw:
             return (422, "Incorrect password")

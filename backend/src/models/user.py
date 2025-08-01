@@ -9,7 +9,7 @@ class User(Base):
     __tablename__ = 'users'
 
     username: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
-    password: Mapped[bytes] = mapped_column(nullable=False)
+    password: Mapped[bytes] = mapped_column(nullable=True)
     email: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     phoneNumber: Mapped[str] = mapped_column(String(100), nullable=True, unique=True)
     role: Mapped[RoleEnum] = mapped_column(SQLEnum(RoleEnum, name="user_role_enum", native_enum=False), default=RoleEnum.USER)
