@@ -221,8 +221,8 @@ class DependencyFactory:
             key=key,
             value=value,
             httponly=True,
-            secure=True,
-            samesite="none",
+            secure=True, # True # False
+            samesite="none", # none # lax
             max_age=max_age
         )
         
