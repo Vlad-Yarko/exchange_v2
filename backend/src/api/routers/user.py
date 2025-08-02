@@ -102,7 +102,7 @@ async def google_url_hand(data = Depends(dependencies.google_url_dep())):
 
 
 @router.post("/google/callback",
-            summary="Logs user in",
+            summary="Logs user in. 💫",
             description="**Logs** user in via oauth 2.0 protocol (google) and **issues** refresh token. 💫",
             tags=["Authentication💫"],
             response_model=CallbackGooglePublic,
